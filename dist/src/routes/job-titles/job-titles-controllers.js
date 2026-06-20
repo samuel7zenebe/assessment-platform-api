@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { jobTitlesRepo } from "./jobTitlesRepo.js";
 import { sValidator } from "@hono/standard-validator";
-import { CreateJobTitleSchema, CreateJobTitlesInBatchSchema, JobTitleIdSchema, UpdateJobTitleSchema, } from "./schema.js";
+import { CreateJobTitleSchema, CreateJobTitlesInBatchSchema, JobTitleIdSchema, JobTitleSchema, UpdateJobTitleSchema, } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
 import z from "zod";
 const factory = createFactory();
@@ -84,8 +84,33 @@ export const getJobTitleById = factory.createHandlers(sValidator("param", JobTit
         });
     }
 });
-export const updateJobTitle = factory.createHandlers(sValidator("json", UpdateJobTitleSchema), async (c) => {
-    const { id, titleName } = c.req.valid("json");
+export const getJobTitleByTitle = factory.createHandlers(sValidator("param", JobTitleSchema.pick({
+    titleName: true,
+})), async (c) => {
+    const { titleName } = c.req.valid("param");
+    try {
+        const jobTitleData = await jobTitlesRepo.findJobTitleByTitle(titleName);
+        return c.json({
+            data: jobTitleData[0],
+            message: jobTitleData[0]?.id ? undefined : "Jobtitle was not found",
+            success: jobTitleData[0]?.id ? true : false,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        throw new HTTPException(500, {
+            cause: "Internal Server Error",
+            message: "An error occurred while fetching the job title",
+        });
+    }
+});
+export const updateJobTitle = factory.createHandlers(sValidator("param", UpdateJobTitleSchema.pick({
+    id: true,
+})), sValidator("json", UpdateJobTitleSchema.pick({
+    titleName: true,
+})), async (c) => {
+    const { titleName } = c.req.valid("json");
+    const { id } = c.req.valid("param");
     try {
         const jobTitleData = await jobTitlesRepo.updateJobTitle(id, {
             titleName: titleName,

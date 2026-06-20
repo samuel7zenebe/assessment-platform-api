@@ -4,6 +4,7 @@ import { sValidator } from "@hono/standard-validator";
 import { usersSchemas } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
 import { APIError } from "better-auth";
+import z4 from "zod/v4";
 const factory = createFactory();
 export const listUsers = factory.createHandlers(sValidator("query", usersSchemas.GetUsersQuerySchema), async (c) => {
     const queryParams = c.req.valid("query");
@@ -29,6 +30,7 @@ export const listUsers = factory.createHandlers(sValidator("query", usersSchemas
         });
     }
     catch (err) {
+        console.log(err);
         throw new HTTPException(500, {
             message: "Internal Server Error",
             cause: err instanceof Error ? err.cause : "unknown",
@@ -38,7 +40,16 @@ export const listUsers = factory.createHandlers(sValidator("query", usersSchemas
 export const getUser = factory.createHandlers(sValidator("param", usersSchemas.GetUserParamsSchema), async (c) => {
     const { id } = c.req.valid("param");
     try {
-        const user = await userRepo.getUserById(id, c);
+        const [user] = await userRepo.getUserById(id, c);
+        if (!user) {
+            return c.json({
+                data: null,
+                message: "No user was found by that id",
+                success: true,
+            }, {
+                status: 404,
+            });
+        }
         return c.json({
             data: user,
             message: "user was successfully fetched",
@@ -59,7 +70,9 @@ export const getUser = factory.createHandlers(sValidator("param", usersSchemas.G
         });
     }
 });
-export const banUser = factory.createHandlers(sValidator("json", usersSchemas.banUserBodySchema), async (c) => {
+export const banUser = factory.createHandlers(sValidator("json", z4.object({
+    id: z4.string(),
+})), async (c) => {
     const body = c.req.valid("json");
     try {
         const user = await userRepo.banUser(body, c);
@@ -70,6 +83,7 @@ export const banUser = factory.createHandlers(sValidator("json", usersSchemas.ba
         });
     }
     catch (err) {
+        console.log(err);
         throw new HTTPException(500, {
             message: "Internal Sever Error",
             cause: err instanceof Error ? err.cause : "unknown",

@@ -26,6 +26,7 @@ export const userRoleEnum = pgEnum("user_role", [
   "CANDIDATE",
   "ADMIN",
   "BUILDER",
+  "SUPER_ADMIN",
 ]);
 
 export const questionTypeEnum = pgEnum("question_type", [
@@ -107,6 +108,9 @@ export const user = pgTable(
     banExpires: timestamp("ban_expires", {
       withTimezone: true,
     }),
+    // Username plugin fields : following two
+    username: varchar("username", { length: 255 }).unique(),
+    displayUsername: text("display_username"),
 
     createdAt: timestamp("created_at", {
       withTimezone: true,
@@ -258,15 +262,20 @@ export const exams = pgTable(
       length: 255,
     }).notNull(),
 
+    category: varchar("category", {
+      length: 255,
+    }),
     description: text("description"),
 
     estimatedTimeMinutes: integer("estimated_time_minutes").notNull(),
-
+    lateEntryGraceMinutes: integer("late_entry_grace_minutes")
+      .default(15)
+      .notNull(),
     scheduledTime: timestamp("scheduled_time", {
       withTimezone: true,
     }),
 
-    passPercentage: integer("pass_percentage").notNull(),
+    passPercentage: integer("pass_percentage").default(50).notNull(),
     generationMode: examGenerationModeEnum("generation_mode")
       .default("QUESTION_COUNT")
       .notNull(),
@@ -274,12 +283,13 @@ export const exams = pgTable(
     totalQuestions: integer("total_questions"),
 
     targetPoints: integer("target_points"),
-
+    pointsPerCorrect: integer("points_per_correct"),
     difficultyLevel: integer("difficulty_level").notNull(),
     status: examStatusEnum("status").default("DRAFT").notNull(),
     createdBy: text("created_by").references(() => user.id, {
       onDelete: "set null",
     }),
+    examMetaData: jsonb("exam_metadata"),
     createdAt: timestamp("created_at", {
       withTimezone: true,
     })
@@ -438,12 +448,42 @@ export const jobTitles = pgTable("job_titles", {
     .notNull()
     .unique(),
 
+  department: varchar("department"),
+
   createdAt: timestamp("created_at", {
     withTimezone: true,
   })
     .defaultNow()
     .notNull(),
 });
+/* =========================================================
+    Job Title Permissions
+========================================================= */
+
+export const jobTitlePermissions = pgTable(
+  "job_title_permissions",
+  {
+    jobTitleId: uuid("job_title_id")
+      .notNull()
+      .references(() => jobTitles.id, {
+        onDelete: "cascade",
+      }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, {
+        onDelete: "cascade",
+      }),
+    createQuestion: boolean("create_question"),
+    updateQuestion: boolean("update_question"),
+    deleteQuestion: boolean("delete_question"),
+    editQuestion: boolean("edit_question"),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.userId, table.jobTitleId],
+    }),
+  }),
+);
 
 /* =========================================================
    QUESTION JOB TITLES

@@ -1,19 +1,23 @@
 import z from "zod";
 
-export const userRoleSchema = z.enum(["CANDIDATE", "BUILDER", "ADMIN"]);
+export const userRoleSchema = z.enum([
+  "CANDIDATE",
+  "BUILDER",
+  "ADMIN",
+  "SUPER_ADMIN",
+]);
 export const questionTypeSchema = z.enum([
   "CHOICE",
   "MATCH",
   "ESSAY",
   "TRUE_FALSE",
 ]);
+export const difficultyLabelSchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 export const ExamGenerationMode = z.enum([
   "QUESTION_COUNT",
   "POINT_TARGET",
   "HYBRID",
 ]);
-
-export const difficultyLabelSchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 
 export const examStatusSchema = z.enum([
   "DRAFT",
@@ -74,7 +78,6 @@ export const filterOperatorSchema = z.enum([
   "ends_with",
   "contains",
 ]);
-
 export const strictBooleanSchema = z.preprocess((val) => {
   if (typeof val === "string") {
     if (val.toLowerCase() === "true") return true;

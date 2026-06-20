@@ -40,6 +40,7 @@ export const QuestionChoicesRepo = {
             .where(eq(questionChoices.id, choiceId))
             .returning({
             id: questionChoices.id,
+            isCorrect: questionChoices.isCorrect,
         });
     },
     getQuestionChoiceById: (id) => {

@@ -14,24 +14,26 @@ app.use("*", cors({
     allowHeaders: ["Content-Type", "Authorization"], // Allow these headersss
     credentials: true,
 }));
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.use("/api/*", async (c, next) => {
     const userDetails = await auth.api.getSession({
-        headers: c.req.raw.headers,
+        headers: new Headers(c.req.raw.headers),
     });
-    if (!userDetails?.user.id || !userDetails.user.role) {
+    const isAuthRoute = c.req.path.startsWith("/api/auth");
+    if (isAuthRoute) {
+        return next();
+    }
+    if (!userDetails?.user) {
         throw new HTTPException(401, {
-            cause: "Unauthorized Access",
             message: "Sign in to access api resources",
         });
     }
     c.set("user", {
         id: userDetails?.user.id,
-        role: userDetails.user.role,
+        role: userDetails?.user.role,
     });
-    console.log(" Middleware ..........");
     await next();
 });
+app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.use("*", logger());
 app.get("/health", async (c) => {
     return c.json({
@@ -42,7 +44,7 @@ app.get("/health", async (c) => {
     });
 });
 app.onError((err, c) => {
-    console.log(err);
+    console.log(c.error);
     if (err instanceof APIError) {
         return c.json({
             success: false,

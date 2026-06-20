@@ -1,4 +1,8 @@
 import z from "zod";
+export const JobTitleSchema = z.object({
+    titleName: z.string(),
+    jobTitleId: z.string(),
+});
 export const CreateJobTitleSchema = z.object({
     titleName: z.string().min(1, "Title name is required"),
 });

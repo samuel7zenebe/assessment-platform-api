@@ -6,12 +6,12 @@ export const questionTypeSchema = z.enum([
     "ESSAY",
     "TRUE_FALSE",
 ]);
+export const difficultyLabelSchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 export const ExamGenerationMode = z.enum([
     "QUESTION_COUNT",
     "POINT_TARGET",
     "HYBRID",
 ]);
-export const difficultyLabelSchema = z.enum(["EASY", "MEDIUM", "HARD"]);
 export const examStatusSchema = z.enum([
     "DRAFT",
     "PUBLISHED",

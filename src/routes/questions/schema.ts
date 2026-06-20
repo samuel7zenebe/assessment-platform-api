@@ -19,6 +19,7 @@ export const QuestionDataSchema = z.object({
   minimumSelections: z.number().default(1).optional(),
   maximumSelections: z.number().optional(),
   partialCredit: z.boolean().default(false).optional(),
+  context: z.string(),
   // For Match
   shuffleLabels: z.boolean().optional(),
   //  For Essay type questions
@@ -51,6 +52,7 @@ export const QuestionBankSchema = z.object({
   question: z.string(),
   difficultyLabel: difficultyLabelSchema,
   type: questionTypeSchema,
+  title: z.string().optional(),
   imageUrl: z.string().nullable(),
   audioUrl: z.string().nullable(),
   videoUrl: z.string().nullable(),
@@ -67,7 +69,7 @@ export const QuestionBankSchema = z.object({
   deletedAt: z.date().optional(),
 });
 
-export const QuestionBankCreateSChema = z.object({
+export const QuestionBankCreateSchema = z.object({
   category: z.string().min(1, "Category is required"),
   question: z.string().min(1, "Question text is required"),
   difficultyLabel: difficultyLabelSchema,
@@ -77,7 +79,7 @@ export const QuestionBankCreateSChema = z.object({
   videoUrl: z.string().optional().nullable(),
   explanation: z.string().optional(),
   estimatedTimeSeconds: z.coerce.number().default(60),
-  questionData: QuestionDataSchema,
+  questionData: QuestionDataSchema.partial(),
   version: z.coerce.number<number>().optional().default(1),
   points: z.coerce
     .number()
@@ -93,23 +95,16 @@ export const QuestionBankCreateSChema = z.object({
   jobTitles: z.array(z.string()).min(1, "At least one job title is required"),
 });
 
-export const QuestionBankEditSchema = z.object({
-  imageUrl: z.string().optional(),
-  category: z.string().optional(),
-  question: z.string().optional(),
-  difficultyLevel: difficultyLabelSchema.optional(),
-  type: questionTypeSchema.optional(),
-  points: z.coerce
-    .number()
-    .int()
-    .positive("Points must be a positive integer")
-    .optional(),
+export const UpdateQuestionBankSchema = QuestionBankSchema.partial().extend({
+  id: z.uuid(),
 });
 
 export const QuestionBankSearchSchema = z.object({
   searchTerm: z.string().optional(),
   field: z.string().optional(),
-  limit: z.coerce.string().optional(),
-  offset: z.coerce.string().optional(),
-  deleted: strictBooleanSchema.default(false),
+  pageNumber: z.coerce.string().optional(),
+  pageSize: z.coerce.string().optional(),
+  includeDeleted: strictBooleanSchema.default(false),
+  jobTitleId: z.string().uuid().optional(),
+  category: z.string().optional(),
 });

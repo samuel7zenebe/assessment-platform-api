@@ -1,12 +1,16 @@
 import { examStatusEnum } from "@/src/db/schema.js";
 import z from "zod";
+import { CreateExamJobTitleSchema } from "../exam-job-titles/schema.js";
 
 export const ExamSchema = z.object({
   id: z.uuid(),
   title: z.string(),
+  category: z.string().nullable(),
+  examMetaData: z.object().nullable(),
   description: z.string().nullable(),
   estimatedTimeMinutes: z.number(),
-  scheduledTime: z.date().nullable(),
+  scheduledTime: z.string().nullable(),
+  lateEntryGraceMinutes: z.number().default(15),
   passPercentage: z.number(),
   totalQuestions: z.number(),
   difficultyLevel: z.number(),
@@ -22,42 +26,51 @@ export const JobTitleCreateExamSchema = z.object({
   weight: z.coerce.number<number>().min(1).max(100).default(100),
 });
 
-export const CreateExamSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  estimatedTimeMinutes: z.number(),
-  scheduledTime: z.string(),
-  passPercentage: z.number(),
-  totalQuestions: z.number(),
-  difficultyLevel: z.number(),
-  status: z.enum(examStatusEnum.enumValues).default("DRAFT"),
-  jobTitles: z.array(JobTitleCreateExamSchema),
-});
+export const CreateExamSchema = ExamSchema.omit({
+  createdAt: true,
+  deletedAt: true,
+  id: true,
+  updatedAt: true,
+})
+  .extend({
+    jobTitles: z.array(
+      JobTitleCreateExamSchema.extend({
+        isPrimary: z.boolean().optional(),
+      }),
+    ),
+  })
+  .omit({
+    createdBy: true,
+  });
 
-export const UpdateExamSchema = z.object({
-  id: z.uuid(),
-  title: z.string().optional(),
-  description: z.string().optional(),
-  estimatedTimeMinutes: z.number().optional(),
-  scheduledTime: z.string().optional(),
-  passPercentage: z.number().optional(),
-  totalQuestions: z.number().optional(),
-  difficultyLevel: z.number().optional(),
-  status: z.enum(examStatusEnum.enumValues).optional(),
-  jobTitleIds: z.array(z.uuid()).optional(),
-});
-
-export const DeleteExamSchema = z.object({
+export const UpdateExamSchema = CreateExamSchema.omit({
+  jobTitles: true,
+}).extend({
   id: z.uuid(),
 });
 
-export const GetExamSchema = z.object({
-  id: z.uuid(),
+export const DeleteExamSchema = ExamSchema.pick({
+  id: true,
+});
+
+export const GetExamSchema = ExamSchema.pick({
+  id: true,
 });
 
 export const PublishExamSchema = z.object({});
 export const ArchiveExamSchema = z.object({});
-export const GenerateExamQuestionsSchema = z.object({
-  totalQuestions: z.number().int().positive().optional(),
+
+export const GenerateExamQuestionsSchema = ExamSchema.pick({
+  id: true,
+  totalQuestions: true,
+  difficultyLevel: true,
+}).extend({
+  jobTitles: z.array(
+    z.object({
+      id: z.string(),
+      weight: z.number().min(0).max(100),
+    }),
+  ),
 });
+
 export const ExamStatisticsSchema = z.object({});

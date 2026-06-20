@@ -1,16 +1,29 @@
 import { db } from "@/src/db/index.js";
 import { questionBank, questionChoices, questionJobTitles, jobTitles as JobTitlesSchema, jobTitles, } from "@/src/db/schema.js";
-import { QuestionBankCreateSChema, QuestionBankEditSchema } from "./schema.js";
-import { desc, eq, inArray } from "drizzle-orm";
-import { Factory } from "hono/factory";
+import { QuestionBankCreateSchema, UpdateQuestionBankSchema, } from "./schema.js";
+import { desc, eq, inArray, isNull, count } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 export const QuestionBankRepo = {
-    findAllQuestions: (conditions) => {
+    findAllQuestions: ({ pageNumber, pageSize, conditions, }) => {
         return db
             .select()
             .from(questionBank)
             .where(conditions)
+            .limit(pageSize)
+            .offset((pageNumber - 1) * pageSize)
             .orderBy(desc(questionBank.createdAt));
+    },
+    getAllCategories: async () => {
+        const result = await db
+            .select({
+            category: questionBank.category,
+            total: count(questionBank.id),
+        })
+            .from(questionBank)
+            .where(isNull(questionBank.deletedAt))
+            .groupBy(questionBank.category)
+            .orderBy(questionBank.category);
+        return result;
     },
     findQuestionById: async (id) => {
         const result = await db
@@ -30,20 +43,20 @@ export const QuestionBankRepo = {
         };
     },
     createQuestionBank: async (data) => {
+        const { choices, jobTitles, ...questionBankData } = data;
+        console.log(choices, jobTitles);
         return db.transaction(async (tx) => {
-            const [questionBankData] = await tx
+            const [questionBankDataRow] = await tx
                 .insert(questionBank)
-                .values({
-                ...data,
-            })
+                .values(questionBankData)
                 .returning({
                 questionBankId: questionBank.id,
             });
-            const formattedChoices = data.choices.map((c) => ({
+            const formattedChoices = choices.map((c) => ({
                 choiceText: c.choiceText,
                 displayOrder: c.displayOrder,
                 isCorrect: c.isCorrect,
-                questionId: questionBankData.questionBankId,
+                questionId: questionBankDataRow.questionBankId,
             }));
             await tx.insert(questionChoices).values(formattedChoices).returning({
                 id: questionChoices.id,
@@ -51,13 +64,13 @@ export const QuestionBankRepo = {
             const jobTitlesData = await tx
                 .select()
                 .from(JobTitlesSchema)
-                .where(inArray(JobTitlesSchema.titleName, data.jobTitles));
-            const formattedQuestionJobTitles = jobTitlesData.map((data) => ({
-                jobTitleId: data.id,
-                questionId: questionBankData.questionBankId,
+                .where(inArray(JobTitlesSchema.id, jobTitles));
+            const formattedQuestionJobTitles = jobTitlesData.map((jt) => ({
+                jobTitleId: jt.id,
+                questionId: questionBankDataRow.questionBankId,
             }));
             await tx.insert(questionJobTitles).values(formattedQuestionJobTitles);
-            return questionBankData.questionBankId;
+            return questionBankDataRow.questionBankId;
         });
     },
     updateQuestion: (id, data) => {

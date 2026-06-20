@@ -13,6 +13,7 @@ export const QuestionDataSchema = z.object({
     minimumSelections: z.number().default(1).optional(),
     maximumSelections: z.number().optional(),
     partialCredit: z.boolean().default(false).optional(),
+    context: z.string(),
     // For Match
     shuffleLabels: z.boolean().optional(),
     //  For Essay type questions
@@ -57,7 +58,7 @@ export const QuestionBankSchema = z.object({
     updatedAt: z.date().optional(),
     deletedAt: z.date().optional(),
 });
-export const QuestionBankCreateSChema = z.object({
+export const QuestionBankCreateSchema = z.object({
     category: z.string().min(1, "Category is required"),
     question: z.string().min(1, "Question text is required"),
     difficultyLabel: difficultyLabelSchema,
@@ -80,24 +81,20 @@ export const QuestionBankCreateSChema = z.object({
     choices: z
         .array(QuestionChoiceSchema)
         .min(2, "At least two choices are required"),
-    jobTitles: z.array(z.string()).min(1, "At least one job title is required"),
+    jobTitles: z
+        .array(z.string().uuid())
+        .min(1, "At least one job title is required"),
 });
-export const QuestionBankEditSchema = z.object({
-    imageUrl: z.string().optional(),
-    category: z.string().optional(),
-    question: z.string().optional(),
-    difficultyLevel: difficultyLabelSchema.optional(),
-    type: questionTypeSchema.optional(),
-    points: z.coerce
-        .number()
-        .int()
-        .positive("Points must be a positive integer")
-        .optional(),
+export const UpdateQuestionBankSchema = QuestionBankSchema.partial().extend({
+    id: z.uuid(),
+    question: z.string().min(1).optional(),
 });
 export const QuestionBankSearchSchema = z.object({
     searchTerm: z.string().optional(),
     field: z.string().optional(),
-    limit: z.coerce.string().optional(),
-    offset: z.coerce.string().optional(),
-    deleted: strictBooleanSchema.default(false),
+    pageNumber: z.coerce.string().optional(),
+    pageSize: z.coerce.string().optional(),
+    includeDeleted: strictBooleanSchema.default(false),
+    jobTitleId: z.string().uuid().optional(),
+    category: z.string().optional(),
 });

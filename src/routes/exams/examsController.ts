@@ -7,11 +7,13 @@ import {
   CreateExamSchema,
   UpdateExamSchema,
   DeleteExamSchema,
-  PublishExamSchema,
-  ArchiveExamSchema,
   GenerateExamQuestionsSchema,
 } from "./schema.js";
 import { APIError } from "better-auth";
+import { db } from "@/src/db/index.js";
+import { examQuestions, exams, examJobTitles } from "@/src/db/schema.js";
+import { eq } from "drizzle-orm";
+import { HTTPException } from "hono/http-exception";
 
 const factory = createFactory();
 
@@ -35,6 +37,27 @@ export const getAllExams = factory.createHandlers(
   },
 );
 
+export const getExamCategories = factory.createHandlers(async (c) => {
+  try {
+    const categories = await examRepo.getExamCategories();
+
+    return c.json(
+      {
+        data: categories,
+        success: true,
+        total: categories.length,
+      },
+      {
+        status: categories.length > 0 ? 200 : 404,
+      },
+    );
+  } catch (error) {
+    throw new HTTPException(500, {
+      cause: "Internal Server Error",
+      message: "An error occurred while fetching categories",
+    });
+  }
+});
 // ── GET    /:id  → get exam ──────────────────────────────────────────────────
 export const getExamById = factory.createHandlers(
   hasPermission({ resource: "exam", action: "read" }),
@@ -42,7 +65,7 @@ export const getExamById = factory.createHandlers(
   async (c) => {
     try {
       const examId = c.req.valid("param").id;
-      const data = (await examRepo.getExam(examId)).at(0);
+      const data = await examRepo.getExam(examId);
       if (!data)
         throw new APIError("NOT_FOUND", {
           message: "Exam not found",
@@ -64,38 +87,36 @@ export const createExam = factory.createHandlers(
   hasPermission({ resource: "exam", action: "create" }),
   sValidator("json", CreateExamSchema),
   async (c) => {
-    try {
-      const userId = c.get("user").id;
-      const exam = c.req.valid("json");
-      const [examData, examJobTitlesData] = await examRepo.createExam(
-        userId,
-        exam,
-      );
-      if (!examData.id)
-        throw new APIError("INTERNAL_SERVER_ERROR", {
-          message: "Failed to create exam",
-        });
-      await examRepo.createRandomExamQuestions(
-        examData.id,
-        exam.totalQuestions,
-        exam.difficultyLevel,
-        exam.jobTitles,
-      );
-      return c.json(
-        {
-          data: { exam: examData.id },
-          success: true,
-          message: `An exam with id ${examData.id} is created successfully.`,
-        },
-        { status: 201 },
-      );
-    } catch (err) {
-      if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", {
-        message: "An error occurred while creating the exam",
-        cause: err,
-      });
-    }
+    const userId = c.get("user").id;
+    const exam = c.req.valid("json");
+
+    console.log("Passed Jobtitles : ", exam.jobTitles);
+
+    const [examData, examJobTitlesData] = await examRepo.createExam(
+      userId,
+      exam,
+    );
+
+    const { distribution } = await examRepo.createRandomExamQuestions({
+      difficultyLevel: exam.difficultyLevel,
+      id: examData.id,
+      jobTitles: exam.jobTitles.map((j) => ({
+        id: j.id,
+        weight: j.weight,
+      })),
+      totalQuestions: exam.totalQuestions,
+    });
+
+    console.log(" Distribution : ", distribution);
+
+    return c.json(
+      {
+        data: { exam: examData.id, distribution },
+        success: true,
+        message: `An exam with id ${examData.id} is created successfully.`,
+      },
+      { status: 201 },
+    );
   },
 );
 
@@ -160,31 +181,39 @@ export const getExamQuestions = factory.createHandlers(
       const examId = c.req.valid("param").id;
       const examQuestionsData = await examRepo.getExamQuestions(examId);
       const total = examQuestionsData.length;
-      const formatted = examQuestionsData.map((eqRow) => ({
-        examId: eqRow.exam_questions.examId,
-        totalQuestions: total,
-        difficultyDistribution: {
-          easy: examQuestionsData.filter(
-            (q) => q?.question_bank?.difficultyLabel === "EASY",
-          ).length,
-          medium: examQuestionsData.filter(
-            (q) => q?.question_bank?.difficultyLabel === "MEDIUM",
-          ).length,
-          hard: examQuestionsData.filter(
-            (q) => q?.question_bank?.difficultyLabel === "HARD",
-          ).length,
-        },
-        question: {
-          questionId: eqRow.exam_questions.questionId,
-          questionOrder: eqRow.exam_questions.questionOrder,
-        },
+      const formattedQuestions = examQuestionsData.map((eqRow) => ({
+        questionId: eqRow.exam_questions.questionId,
+        questionOrder: eqRow.exam_questions.questionOrder,
+        questionText: eqRow.question_bank?.question,
       }));
-      if (!formatted.length)
+      if (!formattedQuestions.length)
         throw new APIError("NOT_FOUND", {
           message: "Exam questions not found",
           status: 404,
         });
-      return c.json({ data: formatted, success: true }, { status: 200 });
+      return c.json(
+        {
+          data: {
+            ...examQuestionsData[0].exams,
+            examId,
+            totalQuestions: total,
+            difficultyDistribution: {
+              easy: examQuestionsData.filter(
+                (q) => q?.question_bank?.difficultyLabel === "EASY",
+              ).length,
+              medium: examQuestionsData.filter(
+                (q) => q?.question_bank?.difficultyLabel === "MEDIUM",
+              ).length,
+              hard: examQuestionsData.filter(
+                (q) => q?.question_bank?.difficultyLabel === "HARD",
+              ).length,
+            },
+            questions: formattedQuestions,
+          },
+          success: true,
+        },
+        { status: 200 },
+      );
     } catch (err) {
       if (err instanceof APIError) throw err;
       throw new APIError("INTERNAL_SERVER_ERROR", {
@@ -202,7 +231,7 @@ export const publishExam = factory.createHandlers(
   async (c) => {
     try {
       const examId = c.req.valid("param").id;
-      const [exists] = await examRepo.getExam(examId);
+      const exists = await examRepo.getExam(examId);
       if (!exists)
         throw new APIError("NOT_FOUND", {
           message: "Exam not found",
@@ -234,7 +263,7 @@ export const archiveExam = factory.createHandlers(
   async (c) => {
     try {
       const examId = c.req.valid("param").id;
-      const [exists] = await examRepo.getExam(examId);
+      const exists = await examRepo.getExam(examId);
       if (!exists)
         throw new APIError("NOT_FOUND", {
           message: "Exam not found",
@@ -266,7 +295,7 @@ export const activateExam = factory.createHandlers(
   async (c) => {
     try {
       const examId = c.req.valid("param").id;
-      const [exists] = await examRepo.getExam(examId);
+      const exists = await examRepo.getExam(examId);
       if (!exists)
         throw new APIError("NOT_FOUND", {
           message: "Exam not found",
@@ -299,7 +328,7 @@ export const closeExam = factory.createHandlers(
   async (c) => {
     try {
       const examId = c.req.valid("param").id;
-      const [exists] = await examRepo.getExam(examId);
+      const exists = await examRepo.getExam(examId);
       if (!exists)
         throw new APIError("NOT_FOUND", {
           message: "Exam not found",
@@ -327,21 +356,31 @@ export const closeExam = factory.createHandlers(
 // ── POST   /:id/generate  → generate exam questions ─────────────────────────
 export const generateExamQuestions = factory.createHandlers(
   hasPermission({ resource: "exam", action: "update" }),
-  sValidator("json", GenerateExamQuestionsSchema),
+  sValidator(
+    "json",
+    GenerateExamQuestionsSchema.omit({
+      id: true,
+    }),
+  ),
   sValidator("param", z.object({ id: z.uuid() })),
   async (c) => {
     try {
       const examId = c.req.valid("param").id;
-      const { totalQuestions } = c.req.valid("json");
-      const questions = await examRepo.generateQuestions(
-        examId,
-        totalQuestions,
-      );
+      const { totalQuestions, difficultyLevel, jobTitles } =
+        c.req.valid("json");
+      const { distribution, exam_questions } =
+        await examRepo.createRandomExamQuestions({
+          difficultyLevel,
+          id: examId,
+          jobTitles,
+          totalQuestions,
+        });
+
       return c.json(
         {
-          data: questions,
+          data: { exam_questions, distribution },
           success: true,
-          message: `Exam questions generated successfully (${questions.length} questions).`,
+          message: `Exam questions generated successfully (${exam_questions.length} questions).`,
         },
         { status: 200 },
       );
@@ -354,7 +393,69 @@ export const generateExamQuestions = factory.createHandlers(
     }
   },
 );
+// ── POST   /:id/regenerate  → regenerate exam questions ─────────────────────────
+export const regenerateExamQuestions = factory.createHandlers(
+  hasPermission({ resource: "exam", action: "update" }),
+  sValidator(
+    "json",
+    GenerateExamQuestionsSchema.omit({
+      id: true,
+    }),
+  ),
+  sValidator("param", z.object({ id: z.uuid() })),
+  async (c) => {
+    try {
+      const examId = c.req.valid("param").id;
 
+      const { totalQuestions, difficultyLevel, jobTitles } =
+        c.req.valid("json");
+      // Delete all existing exam Question
+      await db.delete(examQuestions).where(eq(examQuestions.examId, examId));
+
+      // Update the totalQuestions
+      await db
+        .update(exams)
+        .set({
+          totalQuestions,
+        })
+        .where(eq(exams.id, examId));
+      // Delete all exam-job-titles for the exam
+      await db.delete(examJobTitles).where(eq(examJobTitles.examId, examId));
+
+      // Insert the new job titles
+      await db.insert(examJobTitles).values(
+        jobTitles.map((jobTitle) => ({
+          examId,
+          jobTitleId: jobTitle.id,
+          weight: jobTitle.weight,
+        })),
+      );
+
+      const { distribution, exam_questions } =
+        await examRepo.createRandomExamQuestions({
+          difficultyLevel,
+          id: examId,
+          jobTitles,
+          totalQuestions,
+        });
+
+      return c.json(
+        {
+          data: { exam_questions, distribution },
+          success: true,
+          message: `Exam questions generated successfully (${exam_questions.length} questions).`,
+        },
+        { status: 200 },
+      );
+    } catch (err) {
+      if (err instanceof APIError) throw err;
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to generate exam questions",
+        cause: err,
+      });
+    }
+  },
+);
 // ── GET    /:id/statistics  → exam analytics ─────────────────────────────────
 export const getExamStatistics = factory.createHandlers(
   hasPermission({ resource: "exam", action: "read" }),

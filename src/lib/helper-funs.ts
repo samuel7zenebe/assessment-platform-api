@@ -1,6 +1,11 @@
 import { db } from "../db/index.js";
-import { questionBank, questionJobTitles } from "../db/schema.js";
-import { and, eq } from "drizzle-orm";
+import {
+  jobTitles,
+  questionBank,
+  questionJobTitles,
+  user,
+} from "../db/schema.js";
+import { and, eq, inArray } from "drizzle-orm";
 
 export const questionsExist = async (
   jobId: string,
@@ -19,3 +24,64 @@ export const questionsExist = async (
     );
   return questions.length >= maximumQuestions;
 };
+
+export async function getUserByEmail({ email }: { email: string }) {
+  try {
+    const [userDetails] = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email))
+      .limit(1);
+    if (!userDetails.id) {
+      return {
+        data: null,
+        found: false,
+        message: "No user was found",
+      };
+    }
+    return {
+      data: userDetails,
+      found: true,
+    };
+  } catch (err) {
+    console.log("Could not find user...", err);
+    return {
+      data: null,
+      found: false,
+      message: "Something went wrong",
+    };
+  }
+}
+
+export async function getJobTitleIds({
+  titleNames,
+}: {
+  titleNames: string[];
+}): Promise<{
+  data: {
+    jobTitleIds: string[] | null;
+  };
+  message?: string;
+}> {
+  try {
+    const jobTitleIds = (
+      await db
+        .select()
+        .from(jobTitles)
+        .where(inArray(jobTitles.titleName, titleNames))
+    ).map((jt) => jt.id);
+    return {
+      data: {
+        jobTitleIds,
+      },
+    };
+  } catch (err) {
+    console.log("Failed to find jobTitleIds ", err);
+    return {
+      data: {
+        jobTitleIds: null,
+      },
+      message: "Something went wrong",
+    };
+  }
+}

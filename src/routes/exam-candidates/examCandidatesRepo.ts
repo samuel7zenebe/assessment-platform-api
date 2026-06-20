@@ -1,10 +1,11 @@
 import { db } from "@/src/db/index.js";
-import {
-  examCandidates,
-} from "@/src/db/schema.js";
+import { examCandidates } from "@/src/db/schema.js";
 import { eq, and, inArray } from "drizzle-orm";
 import type z from "zod";
-import type { AssignCandidatesSchema, UpdateAssignmentStatusSchema } from "./schema.js";
+import type {
+  AssignCandidatesSchema,
+  UpdateAssignmentStatusSchema,
+} from "./schema.js";
 import { APIError } from "better-auth";
 
 export const examCandidatesRepo = {
@@ -24,9 +25,12 @@ export const examCandidatesRepo = {
       .select({ candidateId: examCandidates.candidateId })
       .from(examCandidates)
       .where(
-        inArray(
-          examCandidates.candidateId,
-          data.candidates.map((c) => c.candidateId),
+        and(
+          eq(examCandidates.examId, examId),
+          inArray(
+            examCandidates.candidateId,
+            data.candidates.map((c) => c.candidateId),
+          ),
         ),
       );
 
@@ -37,7 +41,7 @@ export const examCandidatesRepo = {
       .map((c) => ({
         examId,
         candidateId: c.candidateId,
-        assignmentStatus: c.assignmentStatus ?? "ASSIGNED" as const,
+        assignmentStatus: c.assignmentStatus ?? ("ASSIGNED" as const),
         assignedAt: new Date(),
       }));
 

@@ -19,7 +19,10 @@ export async function generateExamByDifficulty({
   jobTitles,
   totalQuestions,
 }: GenerateExamProps) {
-  const dist = calculateQuestionDistribution(totalQuestions, difficultyLevel);
+  const dist = getQuestionDifficultyDistribution({
+    totalQuestions,
+    difficultyLevel,
+  });
 
   let generatedExamQuestions: Array<any> = [];
   for (let jobTitle of jobTitles) {
@@ -86,10 +89,13 @@ export async function generateExamByDifficulty({
   };
 }
 
-function calculateQuestionDistribution(
-  totalQuestions: number,
-  difficultyLevel: number,
-) {
+export function getQuestionDifficultyDistribution({
+  difficultyLevel,
+  totalQuestions,
+}: {
+  totalQuestions: number;
+  difficultyLevel: number;
+}) {
   const normalized = Math.max(0, Math.min(10, difficultyLevel)) / 10;
   let easyPercent: number, mediumPercent: number, hardPercent: number;
 

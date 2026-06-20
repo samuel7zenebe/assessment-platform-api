@@ -1,5 +1,5 @@
 import { db } from "@/src/db/index.js";
-import { eq, inArray } from "drizzle-orm";
+import { count, eq, inArray, isNull } from "drizzle-orm";
 import {
   examJobTitles,
   examQuestions,
@@ -8,10 +8,19 @@ import {
   examAttempts,
   attemptQuestions,
   answers as answersTable,
+  examCandidates,
+  jobTitles,
+  questionJobTitles,
 } from "@/src/db/schema.js";
-import { type CreateExamSchema } from "./schema.js";
+import {
+  GenerateExamQuestionsSchema,
+  type CreateExamSchema,
+} from "./schema.js";
 import type z from "zod";
-import { generateExamByDifficulty } from "./utils.js";
+import {
+  generateExamByDifficulty,
+  getQuestionDifficultyDistribution,
+} from "./utils.js";
 import { APIError } from "better-auth";
 import type { examStatusSchema } from "@/src/lib/schema.js";
 
@@ -35,7 +44,9 @@ export const examRepo = {
         .values({
           ...exam,
           createdBy,
-          scheduledTime: new Date(exam.scheduledTime),
+          scheduledTime: exam?.scheduledTime
+            ? new Date(exam.scheduledTime)
+            : new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -44,42 +55,49 @@ export const examRepo = {
       const formattedExamJobTitlesData = exam.jobTitles.map((jobTitle) => ({
         examId: examData.id,
         jobTitleId: jobTitle.id,
+        weightPercentage: jobTitle.weight,
       }));
+
       const [examJobTitlesData] = await tx
         .insert(examJobTitles)
         .values(formattedExamJobTitlesData)
         .returning();
+
       return [examData, examJobTitlesData];
     });
   },
 
-  createRandomExamQuestions: async (
-    examId: string,
-    totalQuestions: number,
-    difficultyLevel: number,
-    jobTitles: Array<{ id: string; weight: number }>,
-  ) => {
-    const { exam } = await generateExamByDifficulty({
+  createRandomExamQuestions: async ({
+    difficultyLevel,
+    jobTitles,
+    totalQuestions,
+    id,
+  }: z.infer<typeof GenerateExamQuestionsSchema>) => {
+    const { exam, distribution } = await generateExamByDifficulty({
       difficultyLevel,
       jobTitles,
       totalQuestions,
     });
 
-    const data = await db
+    const exam_questions = await db
       .insert(examQuestions)
       .values(
         exam.map((q, index) => ({
-          examId,
+          examId: id,
           questionId: q.question_bank.id,
           questionOrder: index,
         })),
       )
       .returning();
-    return data;
+    return {
+      exam_questions,
+      distribution,
+    };
   },
 
   updateExam: async (examId: string, updates: Record<string, unknown>) => {
     const { id, ...rest } = updates;
+    console.log(updates);
     const currentExam = (
       await db.select().from(exams).where(eq(exams.id, examId))
     ).at(0);
@@ -106,9 +124,56 @@ export const examRepo = {
   deleteExam: async (examId: string) => {
     return db.delete(exams).where(eq(exams.id, examId)).returning();
   },
-
+  getExamCategories: async () => {
+    const result = await db
+      .select({
+        category: exams.category,
+        total: count(exams.id),
+      })
+      .from(exams)
+      .where(isNull(exams.deletedAt))
+      .groupBy(exams.category)
+      .orderBy(exams.category);
+    return result;
+  },
   getExam: async (examId: string) => {
-    return await db.select().from(exams).where(eq(exams.id, examId));
+    const exam_candidates = await db
+      .select({
+        id: exams.id,
+        title: exams.title,
+        totalQuestions: exams.totalQuestions,
+        description: exams.description,
+        targetPoints: exams.targetPoints,
+        status: exams.status,
+        generationMode: exams.generationMode,
+        estimatedTimeMinutes: exams.estimatedTimeMinutes,
+        category: exams.category,
+        difficultyLevel: exams.difficultyLevel,
+        lateEntryGraceMinutes: exams.lateEntryGraceMinutes,
+        passPercentage: exams.passPercentage,
+        scheduledTime: exams.scheduledTime,
+        createdAt: exams.createdAt,
+        updatedAt: exams.updatedAt,
+        createdBy: exams.createdBy,
+        totalCandidates: count(examCandidates.candidateId),
+      })
+      .from(exams)
+      .leftJoin(examCandidates, eq(exams.id, examCandidates.examId))
+      .groupBy(exams.id)
+      .where(eq(exams.id, examId));
+
+    // const totalCandidates = exam_candidates[0].exam_candidates
+    //   ? exam_candidates.length
+    //   : 0;
+
+    // console.log(" Exam Candidates : ", exam_candidates);
+
+    // return {
+    //   ...exam_candidates[0].exams,
+    //   totalCandidates,
+    // };
+
+    return exam_candidates[0];
   },
 
   getExamQuestions: async (examId: string) => {
@@ -117,6 +182,7 @@ export const examRepo = {
       .from(examQuestions)
       .where(eq(examQuestions.examId, examId))
       .leftJoin(questionBank, eq(examQuestions.questionId, questionBank.id))
+      .leftJoin(exams, eq(exams.id, examId))
       .orderBy(examQuestions.questionOrder);
   },
 
@@ -167,45 +233,6 @@ export const examRepo = {
       .returning();
     return updated;
   },
-
-  generateQuestions: async (examId: string, totalQuestions?: number) => {
-    const [exam] = await db.select().from(exams).where(eq(exams.id, examId));
-    if (!exam)
-      throw new APIError("NOT_FOUND", {
-        status: 404,
-        message: "Exam not found",
-      });
-
-    const count = totalQuestions ?? exam.totalQuestions ?? 20;
-    const rows = await db
-      .select({ jobTitleId: examJobTitles.jobTitleId })
-      .from(examJobTitles)
-      .where(eq(examJobTitles.examId, examId));
-
-    const jobTitles = rows.map((r) => ({
-      id: String(r.jobTitleId),
-      weight: 100,
-    }));
-
-    await examRepo.createRandomExamQuestions(
-      examId,
-      count,
-      exam.difficultyLevel,
-      jobTitles,
-    );
-
-    await db
-      .update(exams)
-      .set({ totalQuestions: count, updatedAt: new Date() })
-      .where(eq(exams.id, examId));
-
-    return await db
-      .select()
-      .from(examQuestions)
-      .where(eq(examQuestions.examId, examId))
-      .orderBy(examQuestions.questionOrder);
-  },
-
   getExamStatistics: async (examId: string) => {
     const [exam] = await db.select().from(exams).where(eq(exams.id, examId));
     if (!exam)

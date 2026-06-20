@@ -1,5 +1,5 @@
 import { db } from "@/src/db/index.js";
-import { examCandidates, } from "@/src/db/schema.js";
+import { examCandidates } from "@/src/db/schema.js";
 import { eq, and, inArray } from "drizzle-orm";
 import { APIError } from "better-auth";
 export const examCandidatesRepo = {
@@ -14,7 +14,7 @@ export const examCandidatesRepo = {
         const existing = await db
             .select({ candidateId: examCandidates.candidateId })
             .from(examCandidates)
-            .where(inArray(examCandidates.candidateId, data.candidates.map((c) => c.candidateId)));
+            .where(and(eq(examCandidates.examId, examId), inArray(examCandidates.candidateId, data.candidates.map((c) => c.candidateId))));
         const existingIds = new Set(existing.map((r) => r.candidateId));
         const inserts = data.candidates
             .filter((c) => !existingIds.has(c.candidateId))

@@ -12,6 +12,8 @@ import {
   getExamStatistics,
   activateExam,
   closeExam,
+  regenerateExamQuestions,
+  getExamCategories,
 } from "./examsController.js";
 import {
   addQuestionToExam,
@@ -31,10 +33,11 @@ import {
   updateAssignmentStatus,
 } from "../exam-candidates/examCandidatesController.js";
 
+import { examRepo } from "./examsRepo.js";
 export const examsRouter = new Hono()
-
   // ── List / detail ─────────────────────────────────────────────────────────
   .get("/", ...getAllExams)
+  .get("/categories", ...getExamCategories)
   .post("/", ...createExam)
   .get("/:id", ...getExamById)
   .put("/:id", ...updateExam)
@@ -52,13 +55,13 @@ export const examsRouter = new Hono()
   .delete(":/id/questions/:questionId", ...removeQuestionFromExam)
   .patch("/:id/questions/reorder", ...bulkReorder)
   // job titles weight
-
   .get("/:id/job-titles", ...getExamJobTitlesByExamId)
   .post("/:id/job-titles", ...addJobTitle)
-  .patch("/:id/job-titles/:jobTitlesId", ...editExamJobTitle)
+  .patch("/:id/job-titles/:jobTitleId", ...editExamJobTitle)
   .delete("/:id/job-titles/:jobTitleId", ...deleteExamJobTitle)
   // Fetch jobtitles of some job-title id
   .post("/:id/generate", ...generateExamQuestions)
+  .post("/:id/regenerate", ...regenerateExamQuestions)
   .get("/:id/statistics", ...getExamStatistics)
 
   //  Admin only

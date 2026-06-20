@@ -1,45 +1,80 @@
 import { createFactory } from "hono/factory";
 import { QuestionBankRepo } from "./questionBankRepo.js";
 import { sValidator } from "@hono/standard-validator";
-import { QuestionBankCreateSChema, QuestionBankEditSchema, QuestionBankSearchSchema, } from "./schema.js";
+import { QuestionBankCreateSchema, QuestionBankSearchSchema, UpdateQuestionBankSchema, } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
-import { ilike, isNull, or, isNotNull } from "drizzle-orm";
-import { questionBank, user } from "@/src/db/schema.js";
+import { db } from "@/src/db/index.js";
+import { ilike, isNull, and, isNotNull, inArray, eq, or } from "drizzle-orm";
+import { questionBank, user, questionJobTitles } from "@/src/db/schema.js";
 import z from "zod";
 import { hasPermission } from "@/src/middleware/auth.js";
 const factory = createFactory();
 export const getQuestions = factory.createHandlers(sValidator("query", QuestionBankSearchSchema), async (c) => {
-    const { field, searchTerm, deleted } = c.req.valid("query");
+    const { field = "all", searchTerm, includeDeleted, jobTitleId, category, pageSize = 10, pageNumber = 1, } = c.req.valid("query");
     try {
         let conditions = [];
         if (searchTerm) {
             const searchPattern = `%${searchTerm}%`;
-            if (field === "all" || field === "question") {
+            if (field === "question") {
                 conditions.push(ilike(questionBank.question, searchPattern));
             }
-            if (field === "all" || field === "category") {
+            if (field === "category") {
                 conditions.push(ilike(questionBank.category, searchPattern));
             }
+            if (field === "all") {
+                conditions.push(or(ilike(questionBank.category, searchPattern), ilike(questionBank.question, searchPattern)));
+            }
         }
-        if (deleted) {
-            conditions.push(isNotNull(questionBank.deletedAt));
+        if (category) {
+            conditions.push(eq(questionBank.category, category));
         }
-        else {
+        if (!includeDeleted) {
             conditions.push(isNull(questionBank.deletedAt));
         }
-        const questionsData = await QuestionBankRepo.findAllQuestions(conditions.length > 0 ? or(...conditions) : undefined);
+        if (jobTitleId) {
+            conditions.push(inArray(questionBank.id, db
+                .select({ id: questionJobTitles.questionId })
+                .from(questionJobTitles)
+                .where(eq(questionJobTitles.jobTitleId, jobTitleId))));
+        }
+        // For testing it shall be enabled later
+        // const { id: userId } = c.get("user");
+        // conditions.push(eq(questionBank.createdBy, userId));
+        const questionsData = await QuestionBankRepo.findAllQuestions({
+            pageSize: Number(pageSize),
+            pageNumber: Number(pageNumber),
+            conditions: conditions.length > 0 ? and(...conditions) : undefined,
+        });
+        const totalQuestions = await db.select().from(questionBank);
         return c.json({
             data: questionsData,
             success: true,
-            total: questionsData.length,
+            total: totalQuestions.length,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        throw new HTTPException(500, {
+            cause: "Internal Server Error",
+            message: "An error occurred while fetching questions",
+        });
+    }
+});
+export const getAllCategories = factory.createHandlers(async (c) => {
+    try {
+        const categories = await QuestionBankRepo.getAllCategories();
+        return c.json({
+            data: categories,
+            success: true,
+            total: categories.length,
         }, {
-            status: questionsData.length > 0 ? 200 : 404,
+            status: categories.length > 0 ? 200 : 404,
         });
     }
     catch (error) {
         throw new HTTPException(500, {
             cause: "Internal Server Error",
-            message: "An error occurred while fetching questions",
+            message: "An error occurred while fetching categories",
         });
     }
 });
@@ -65,7 +100,9 @@ export const getQuestionById = factory.createHandlers(sValidator("param", z.obje
 export const createQuestion = factory.createHandlers(hasPermission({
     resource: "question",
     action: "create",
-}), sValidator("json", QuestionBankCreateSChema), async (c) => {
+}), sValidator("json", QuestionBankCreateSchema.omit({
+    createdBy: true,
+})), async (c) => {
     const { id: userId, role: userRole } = c.get("user");
     if (userRole === "CANDIDATE") {
         throw new HTTPException(403, {
@@ -102,7 +139,7 @@ export const createQuestion = factory.createHandlers(hasPermission({
         });
     }
 });
-export const createQuestionInBatch = factory.createHandlers(sValidator("json", z.array(QuestionBankCreateSChema)), async (c) => {
+export const createQuestionInBatch = factory.createHandlers(sValidator("json", z.array(QuestionBankCreateSchema)), async (c) => {
     const { id: userId, role: userRole } = c.get("user");
     if (userRole === "CANDIDATE") {
         throw new HTTPException(403, {
@@ -138,9 +175,11 @@ export const createQuestionInBatch = factory.createHandlers(sValidator("json", z
 });
 export const updateQuestion = factory.createHandlers(sValidator("param", z.object({
     id: z.uuid(),
-})), sValidator("json", QuestionBankEditSchema), async (c) => {
+})), sValidator("json", UpdateQuestionBankSchema), async (c) => {
     const validData = c.req.valid("json");
     const { id } = c.req.valid("param");
+    console.log("Valid Data: ", validData);
+    console.log(validData);
     try {
         const edit_question = await QuestionBankRepo.updateQuestion(id, validData);
         return c.json({

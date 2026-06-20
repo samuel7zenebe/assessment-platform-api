@@ -10,6 +10,9 @@ export const jobTitlesRepo = {
     findJobTitleById: (id) => {
         return db.select().from(jobTitles).where(eq(jobTitles.id, id));
     },
+    findJobTitleByTitle: (title) => {
+        return db.select().from(jobTitles).where(eq(jobTitles.titleName, title));
+    },
     createJobTitle: (titleName) => {
         return db
             .insert(jobTitles)

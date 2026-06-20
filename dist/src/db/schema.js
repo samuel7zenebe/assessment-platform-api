@@ -66,6 +66,9 @@ export const user = pgTable("user", {
     banExpires: timestamp("ban_expires", {
         withTimezone: true,
     }),
+    // Username plugin fields : following two
+    username: varchar("username", { length: 255 }).unique(),
+    displayUsername: text("display_username"),
     createdAt: timestamp("created_at", {
         withTimezone: true,
     })
@@ -165,22 +168,30 @@ export const exams = pgTable("exams", {
     title: varchar("title", {
         length: 255,
     }).notNull(),
+    category: varchar("category", {
+        length: 255,
+    }),
     description: text("description"),
     estimatedTimeMinutes: integer("estimated_time_minutes").notNull(),
+    lateEntryGraceMinutes: integer("late_entry_grace_minutes")
+        .default(15)
+        .notNull(),
     scheduledTime: timestamp("scheduled_time", {
         withTimezone: true,
     }),
-    passPercentage: integer("pass_percentage").notNull(),
+    passPercentage: integer("pass_percentage").default(50).notNull(),
     generationMode: examGenerationModeEnum("generation_mode")
         .default("QUESTION_COUNT")
         .notNull(),
     totalQuestions: integer("total_questions"),
     targetPoints: integer("target_points"),
+    pointsPerCorrect: integer("points_per_correct"),
     difficultyLevel: integer("difficulty_level").notNull(),
     status: examStatusEnum("status").default("DRAFT").notNull(),
     createdBy: text("created_by").references(() => user.id, {
         onDelete: "set null",
     }),
+    examMetaData: jsonb("exam_metadata"),
     createdAt: timestamp("created_at", {
         withTimezone: true,
     })

@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/src/db/index.js"; // your drizzle instance
 import * as schema from "@/src/db/schema.js";
-import { admin } from "better-auth/plugins";
+import { admin, username } from "better-auth/plugins";
 import { ac, ADMIN, BUILDER, CANDIDATE } from "./permissions.js";
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -34,8 +34,10 @@ export const auth = betterAuth({
     },
     emailAndPassword: {
         enabled: true,
+        autoSignIn: false,
     },
     plugins: [
+        username(),
         admin({
             defaultRole: "CANDIDATE",
             adminRoles: ["ADMIN"],
@@ -47,4 +49,12 @@ export const auth = betterAuth({
             },
         }),
     ],
+    // For cross-origin cookie support
+    // advanced: {
+    //   defaultCookieAttributes: {
+    //     sameSite: "none", // Required for cross-origin
+    //     secure: true, // Required when sameSite is "none"
+    //     partitioned: true, // For third-party cookie compliance
+    //   },
+    // },
 });

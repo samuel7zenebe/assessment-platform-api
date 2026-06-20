@@ -6,6 +6,8 @@ import {
   getQuestionById,
   getQuestions,
   updateQuestion,
+  getAllCategories,
+  createQuestionInBatchExcel,
 } from "./questionBankControllers.js";
 import {
   deleteQuestionChoice,
@@ -13,12 +15,19 @@ import {
   insertQuestionChoice,
   updateQuestionChoice,
 } from "../choices/questionChoicesController.js";
+import {
+  deleteQuestionJobTitle,
+  getQuestionJobTitles,
+  createQuestionJobTitle,
+} from "../question-jobtitles/questionJobTitlesController.js";
 
 export const questionBankRouter = new Hono()
   .get("/", ...getQuestions)
+  .get("/categories", ...getAllCategories)
   .get("/:id", ...getQuestionById)
   .post("/", ...createQuestion)
   .post("/batch", ...createQuestionInBatch)
+  .post("/batch/upload", ...createQuestionInBatchExcel) // Upload and parse Excel file
   // .post("/:id/duplicate", )   /// Not implemented yet
   .patch("/:id", ...updateQuestion)
   .delete("/:id", ...softDeleteQuestion)
@@ -26,4 +35,8 @@ export const questionBankRouter = new Hono()
   .get("/:id/choices", ...getQuestionChoicesByQuestionId)
   .post("/:id/choices", ...insertQuestionChoice)
   .patch("choices/:choiceId", ...updateQuestionChoice)
-  .delete("choices/:choiceId", ...deleteQuestionChoice);
+  .delete("choices/:choiceId", ...deleteQuestionChoice)
+  // Question Jobtitles
+  .get("/:id/job-titles", ...getQuestionJobTitles)
+  .delete("/:questionId/job-titles/:jobTitleId", ...deleteQuestionJobTitle)
+  .post("/:questionId/job-titles/:jobTitleId", ...createQuestionJobTitle);

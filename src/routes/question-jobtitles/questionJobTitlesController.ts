@@ -4,10 +4,11 @@ import { QuestionJobTitleSchema } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
 import { QuestionJobTitlesRepo } from "./questionJobTitlesRepo.js";
 import z from "zod";
+import { title } from "process";
 
 const factory = createFactory<{}>();
 
-export const getQuestionJobTitles = factory.createHandlers(
+export const getQuestionsJobTitles = factory.createHandlers(
   sValidator(
     "query",
     z.object({
@@ -36,6 +37,94 @@ export const getQuestionJobTitles = factory.createHandlers(
   },
 );
 
+export const availableQuestions = factory.createHandlers(
+  sValidator(
+    "json",
+    z.object({
+      weight: z.coerce.number(),
+      totalQuestions: z.coerce.number(),
+      difficultyLevel: z.coerce.number().min(1).max(10),
+    }),
+  ),
+  sValidator(
+    "param",
+    z.object({
+      jobTitleId: z.string(),
+    }),
+  ),
+  async (c) => {
+    try {
+      const { jobTitleId } = c.req.valid("param");
+      const { weight, totalQuestions, difficultyLevel } = c.req.valid("json");
+
+      const questions = await QuestionJobTitlesRepo.checkingQuestionsExistence({
+        jobTitle: {
+          id: jobTitleId,
+          weight: weight,
+        },
+        difficultyLevel,
+        totalQuestions,
+      });
+
+      return c.json({
+        data: {
+          jobTitleId: jobTitleId,
+          titleName: questions[0]?.titleName || "Unknown",
+          questions: ["MEDIUM", "HARD", "EASY"].map((item, index) => ({
+            difficultyLabel:
+              questions.find((q) => q.difficultyLabel === item)
+                ?.difficultyLabel || item,
+            total:
+              questions.find((q) => q.difficultyLabel === item)?.total || 0,
+            required:
+              questions.find((q) => q.difficultyLabel === item)?.required || 0,
+            hasEnough:
+              questions.find((q) => q.difficultyLabel === item)?.hasEnough ||
+              false,
+            message:
+              questions.find((q) => q.difficultyLabel === item)?.message ||
+              `Insufficient ${item.toLowerCase()} questions`,
+          })),
+        },
+        success: true,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new HTTPException(500, {
+        message: "failed to fetch question job titles",
+        cause: "Internal Server Error",
+      });
+    }
+  },
+);
+
+export const getQuestionJobTitles = factory.createHandlers(
+  sValidator(
+    "param",
+    z.object({
+      id: z.string(),
+    }),
+  ),
+  async (c) => {
+    try {
+      const { id } = c.req.valid("param");
+      const questionJobTitles =
+        await QuestionJobTitlesRepo.getQuestionJobTitles(id);
+
+      return c.json({
+        data: questionJobTitles,
+        success: true,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new HTTPException(500, {
+        message: "failed to fetch question question job title",
+        cause: "Internal Server Error",
+      });
+    }
+  },
+);
+
 export const createQuestionJobTitle = factory.createHandlers(
   sValidator("json", QuestionJobTitleSchema.array()),
   async (c) => {
@@ -58,13 +147,19 @@ export const createQuestionJobTitle = factory.createHandlers(
 );
 
 export const deleteQuestionJobTitle = factory.createHandlers(
-  sValidator("param", z.object({ questionId: z.string() })),
+  sValidator(
+    "param",
+    z.object({ questionId: z.string(), jobTitleId: z.string() }),
+  ),
   async (c) => {
     try {
-      const { questionId } = c.req.valid("param");
+      const { questionId, jobTitleId } = c.req.valid("param");
 
       const deletedQuestionJobTitles =
-        await QuestionJobTitlesRepo.deleteQuestionJobTitle(questionId);
+        await QuestionJobTitlesRepo.deleteQuestionJobTitle(
+          questionId,
+          jobTitleId,
+        );
       return c.json({
         data: deletedQuestionJobTitles,
         success: true,

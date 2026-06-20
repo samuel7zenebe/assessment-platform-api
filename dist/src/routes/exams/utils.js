@@ -2,7 +2,10 @@ import { questionBank, questionJobTitles } from "@/src/db/schema.js";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/src/db/index.js";
 export async function generateExamByDifficulty({ difficultyLevel, jobTitles, totalQuestions, }) {
-    const dist = calculateQuestionDistribution(totalQuestions, difficultyLevel);
+    const dist = getQuestionDifficultyDistribution({
+        totalQuestions,
+        difficultyLevel,
+    });
     let generatedExamQuestions = [];
     for (let jobTitle of jobTitles) {
         const [easyQs, mediumQs, hardQs] = await Promise.all([
@@ -40,7 +43,7 @@ export async function generateExamByDifficulty({ difficultyLevel, jobTitles, tot
         distribution: dist,
     };
 }
-function calculateQuestionDistribution(totalQuestions, difficultyLevel) {
+export function getQuestionDifficultyDistribution({ difficultyLevel, totalQuestions, }) {
     const normalized = Math.max(0, Math.min(10, difficultyLevel)) / 10;
     let easyPercent, mediumPercent, hardPercent;
     if (difficultyLevel <= 2) {

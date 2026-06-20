@@ -4,6 +4,7 @@ import { sValidator } from "@hono/standard-validator";
 import { usersSchemas } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
 import { APIError } from "better-auth";
+import z4 from "zod/v4";
 
 const factory = createFactory<{}>();
 
@@ -32,6 +33,7 @@ export const listUsers = factory.createHandlers(
         message: "users ",
       });
     } catch (err) {
+      console.log(err);
       throw new HTTPException(500, {
         message: "Internal Server Error",
         cause: err instanceof Error ? err.cause : "unknown",
@@ -45,7 +47,19 @@ export const getUser = factory.createHandlers(
   async (c) => {
     const { id } = c.req.valid("param");
     try {
-      const user = await userRepo.getUserById(id, c);
+      const [user] = await userRepo.getUserById(id, c);
+      if (!user) {
+        return c.json(
+          {
+            data: null,
+            message: "No user was found by that id",
+            success: true,
+          },
+          {
+            status: 404,
+          },
+        );
+      }
       return c.json({
         data: user,
         message: "user was successfully fetched",
@@ -68,7 +82,12 @@ export const getUser = factory.createHandlers(
 );
 
 export const banUser = factory.createHandlers(
-  sValidator("json", usersSchemas.banUserBodySchema),
+  sValidator(
+    "json",
+    z4.object({
+      id: z4.string(),
+    }),
+  ),
   async (c) => {
     const body = c.req.valid("json");
     try {
@@ -79,6 +98,7 @@ export const banUser = factory.createHandlers(
         success: true,
       });
     } catch (err) {
+      console.log(err);
       throw new HTTPException(500, {
         message: "Internal Sever Error",
         cause: err instanceof Error ? err.cause : "unknown",

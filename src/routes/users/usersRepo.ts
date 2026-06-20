@@ -2,8 +2,6 @@ import { auth } from "@/src/lib/auth.js";
 import type { Context } from "hono";
 import { usersSchemas } from "./schema.js";
 import type z from "zod";
-import { HTTPException } from "hono/http-exception";
-import { bodyLimit } from "hono/body-limit";
 import { db } from "@/src/db/index.js";
 import { user } from "@/src/db/schema.js";
 import { eq } from "drizzle-orm";
@@ -46,12 +44,13 @@ export const userRepo = {
   },
 
   getUserById: async (id: string, c: Context) => {
-    return auth.api.getUser({
-      headers: c.req.raw.headers,
-      query: {
-        id,
-      },
-    });
+    // return auth.api.getUser({
+    //   headers: c.req.raw.headers,
+    //   query: {
+    //     id,
+    //   },
+    // });
+    return db.select().from(user).where(eq(user.id, id));
   },
 
   getMe: async (id: string) => db.select().from(user).where(eq(user.id, id)),
