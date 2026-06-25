@@ -8,10 +8,10 @@ export const CreateAttemptBodySchema = z.object({
 
 /** Attempt ID param */
 export const AttemptIdParamSchema = z.object({
-  attemptId: z.uuid(),
+  attemptId: z.string(),
 });
 
 /** Question order param (0-indexed) */
 export const QuestionOrderParamSchema = z.object({
-  order: z.number().int(),
+  order: z.coerce.number().int(),
 });

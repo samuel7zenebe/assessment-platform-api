@@ -275,7 +275,7 @@ export const attemptsRepo = {
     let answerJson: any = null;
 
     if (answerBody.selectedChoiceId !== undefined) {
-      selectedChoiceId = answerBody.selectedChoiceId;
+      selectedChoiceId = answerBody.selectedChoiceId[0];
     } else if (answerBody.answerText !== undefined) {
       answerText = answerBody.answerText;
     } else if (answerBody.booleanAnswer !== undefined) {

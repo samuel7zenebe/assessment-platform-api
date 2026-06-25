@@ -221,7 +221,7 @@ export const createQuestionInBatch = factory.createHandlers(
     try {
       let newQuestionId = [];
       for (const question of validData) {
-        const newQuestion = await QuestionBankRepo.createQuestionBank({
+        const newQuestion = await QuestionBankRepo.createQuestionBankRecord({
           ...question,
           createdBy: userId,
         });
@@ -280,15 +280,18 @@ export const createQuestionInBatchExcel = factory.createHandlers(
       const { questions, errors, summary } = await parseQuestionBankExcel(file);
 
       if (errors.length > 0) {
-        return c.json({
-          data: {
-            questions,
-            errors,
-            summary,
+        return c.json(
+          {
+            data: {
+              questions,
+              errors,
+              summary,
+            },
+            success: false,
+            message: `Some questions failed to parse. Please check the errors for details.`,
           },
-          success: false,
-          message: `Some questions failed to parse. Please check the errors for details.`,
-        });
+          { status: 400 },
+        );
       }
 
       let newQuestionId = [];
@@ -329,7 +332,7 @@ export const createQuestionInBatchExcel = factory.createHandlers(
           );
         }
 
-        const newQuestion = await QuestionBankRepo.createQuestionBank({
+        const newQuestion = await QuestionBankRepo.createQuestionBankRecord({
           ...question,
           createdBy: creator.data?.id,
           jobTitles: jobTitleIds.data.jobTitleIds,

@@ -7,7 +7,7 @@ import {
   GradingQueueQuerySchema,
   GradeAnswerBodySchema,
   FinalizeGradingSchema,
-} from "./schma.js";
+} from "./schema.js";
 
 const factory = createFactory();
 

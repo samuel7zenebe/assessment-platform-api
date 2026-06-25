@@ -3,8 +3,9 @@ import type { Context } from "hono";
 import { usersSchemas } from "./schema.js";
 import type z from "zod";
 import { db } from "@/src/db/index.js";
-import { user } from "@/src/db/schema.js";
-import { eq } from "drizzle-orm";
+import { examCandidates, exams, user } from "@/src/db/schema.js";
+import { count, eq } from "drizzle-orm";
+import { faker } from "@faker-js/faker";
 
 export const userRepo = {
   getAllUsers: async ({
@@ -150,4 +151,63 @@ export const userRepo = {
       },
     });
   },
+
+  userExams: async (id: string) => {
+    return db
+      .select({
+        id: examCandidates.candidateId,
+        examId: examCandidates.examId,
+      })
+      .from(examCandidates)
+      .where(eq(examCandidates.candidateId, id));
+  },
+
+  generateFakeCandidate: async (
+    c: Context,
+  ): Promise<{
+    id: string;
+    password: string;
+    username: string;
+  }> => {
+    const sex = faker.person.sexType();
+    const firstName = faker.person.firstName(sex);
+    const lastName = faker.person.lastName(sex);
+    const email = faker.internet.email({ firstName, lastName });
+    const name = faker.person.fullName({
+      firstName,
+      lastName,
+    });
+    const username =
+      usernameGenerator() +
+      faker.internet.username({
+        firstName,
+        lastName,
+      });
+    const password = faker.internet.password();
+    const image = faker.image.avatar();
+    const user = await auth.api.createUser({
+      headers: c.req.raw.headers,
+      body: {
+        email,
+        name,
+        password,
+        data: {
+          image,
+          username,
+        },
+      },
+    });
+
+    return {
+      id: user.user.id,
+      password,
+      username,
+    };
+  },
 };
+
+function usernameGenerator() {
+  const year = new Date().getFullYear();
+  const randomString = Math.floor(Math.random() * 10000);
+  return "m_can_" + year.toString() + "_" + randomString;
+}

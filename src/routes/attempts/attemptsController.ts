@@ -7,7 +7,7 @@ import {
   CreateAttemptBodySchema,
   AttemptIdParamSchema,
   QuestionOrderParamSchema,
-} from "./schma.js";
+} from "./schema.js";
 
 const factory = createFactory();
 
@@ -25,9 +25,12 @@ export const createAttempt = factory.createHandlers(
         candidateId,
       });
       return c.json({ data: attempt, success: true });
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to create attempt", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: err.message ?? "Failed to create attempt",
+        cause: err,
+      });
     }
   },
 );
@@ -41,15 +44,22 @@ export const getAttempt = factory.createHandlers(
     const role = c.get("user").role;
 
     try {
-      const attemptWithQuestions = await attemptsRepo.getAttemptWithQuestions(attemptId);
+      const attemptWithQuestions =
+        await attemptsRepo.getAttemptWithQuestions(attemptId);
       // Authorization: CANDIDATE can only see own attempts, ADMIN can see all
       if (role === "CANDIDATE" && attemptWithQuestions.candidateId !== userId) {
-        throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
+        throw new APIError("FORBIDDEN", {
+          message: "Access denied",
+          status: 403,
+        });
       }
       return c.json({ data: attemptWithQuestions, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to fetch attempt", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch attempt",
+        cause: err,
+      });
     }
   },
 );
@@ -68,7 +78,10 @@ export const getQuestionByOrder = factory.createHandlers(
       // First get attempt to check authorization and status
       const attempt = await attemptsRepo.getAttemptWithQuestions(attemptId);
       if (role === "CANDIDATE" && attempt.candidateId !== userId) {
-        throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
+        throw new APIError("FORBIDDEN", {
+          message: "Access denied",
+          status: 403,
+        });
       }
       if (attempt.status !== "IN_PROGRESS") {
         throw new APIError("BAD_REQUEST", {
@@ -81,7 +94,10 @@ export const getQuestionByOrder = factory.createHandlers(
       return c.json({ data: question, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to fetch question", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch question",
+        cause: err,
+      });
     }
   },
 );
@@ -100,7 +116,10 @@ export const markViewed = factory.createHandlers(
       // Check authorization and status
       const attempt = await attemptsRepo.getAttemptWithQuestions(attemptId);
       if (role === "CANDIDATE" && attempt.candidateId !== userId) {
-        throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
+        throw new APIError("FORBIDDEN", {
+          message: "Access denied",
+          status: 403,
+        });
       }
       if (attempt.status !== "IN_PROGRESS") {
         throw new APIError("BAD_REQUEST", {
@@ -113,26 +132,38 @@ export const markViewed = factory.createHandlers(
       return c.json({ data: updated, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to mark viewed", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to mark viewed",
+        cause: err,
+      });
     }
   },
 );
 
 // ── POST   /api/attempts/:id/questions/:order/answer # Upserts the answers row
 export const upsertAnswer = factory.createHandlers(
-  sValidator("param", AttemptIdParamSchema),
-  sValidator("param", QuestionOrderParamSchema),
+  sValidator(
+    "param",
+    z.object({
+      attemptId: z.string(),
+      order: z.coerce.number().int(),
+    }),
+  ),
   async (c) => {
-    const { attemptId } = c.req.valid("param");
-    const { order } = c.req.valid("param");
+    const { attemptId, order } = c.req.valid("param");
+
     const userId = c.get("user").id;
     const role = c.get("user").role;
 
     try {
       // Check authorization and status
       const attempt = await attemptsRepo.getAttemptWithQuestions(attemptId);
+
       if (role === "CANDIDATE" && attempt.candidateId !== userId) {
-        throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
+        throw new APIError("FORBIDDEN", {
+          message: "Access denied",
+          status: 403,
+        });
       }
       if (attempt.status !== "IN_PROGRESS") {
         throw new APIError("BAD_REQUEST", {
@@ -147,22 +178,35 @@ export const upsertAnswer = factory.createHandlers(
         try {
           answerBody = await c.req.json();
         } catch (e) {
-          throw new APIError("BAD_REQUEST", { message: "Invalid JSON body", status: 400 });
+          throw new APIError("BAD_REQUEST", {
+            message: "Invalid JSON body",
+            status: 400,
+          });
         }
       } else {
         // For other content types, try to parse as JSON anyway (or reject)
         try {
           answerBody = await c.req.json();
         } catch (e) {
-          throw new APIError("BAD_REQUEST", { message: "Invalid JSON body", status: 400 });
+          throw new APIError("BAD_REQUEST", {
+            message: "Invalid JSON body",
+            status: 400,
+          });
         }
       }
 
-      const result = await attemptsRepo.upsertAnswer(attemptId, order, answerBody);
+      const result = await attemptsRepo.upsertAnswer(
+        attemptId,
+        order,
+        answerBody,
+      );
       return c.json({ data: result, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to upsert answer", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to upsert answer",
+        cause: err,
+      });
     }
   },
 );
@@ -179,7 +223,10 @@ export const submitAttempt = factory.createHandlers(
       // Check authorization and status
       const attempt = await attemptsRepo.getAttemptWithQuestions(attemptId);
       if (role === "CANDIDATE" && attempt.candidateId !== userId) {
-        throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
+        throw new APIError("FORBIDDEN", {
+          message: "Access denied",
+          status: 403,
+        });
       }
       if (attempt.status !== "IN_PROGRESS") {
         throw new APIError("BAD_REQUEST", {
@@ -192,7 +239,10 @@ export const submitAttempt = factory.createHandlers(
       return c.json({ data: result, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to submit attempt", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to submit attempt",
+        cause: err,
+      });
     }
   },
 );
@@ -209,7 +259,10 @@ export const getResults = factory.createHandlers(
       // Check authorization
       const attempt = await attemptsRepo.getAttemptWithQuestions(attemptId);
       if (role === "CANDIDATE" && attempt.candidateId !== userId) {
-        throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
+        throw new APIError("FORBIDDEN", {
+          message: "Access denied",
+          status: 403,
+        });
       }
       if (attempt.status !== "GRADED") {
         throw new APIError("BAD_REQUEST", {
@@ -222,7 +275,10 @@ export const getResults = factory.createHandlers(
       return c.json({ data: results, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to fetch results", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch results",
+        cause: err,
+      });
     }
   },
 );

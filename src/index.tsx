@@ -69,8 +69,8 @@ app.get("/health", async (c) => {
 });
 
 app.onError((err, c) => {
-  console.log(c.error);
   if (err instanceof APIError) {
+    console.log(c.error);
     return c.json(
       {
         success: false,

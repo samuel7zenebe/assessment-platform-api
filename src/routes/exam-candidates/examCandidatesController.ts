@@ -10,6 +10,7 @@ import {
 } from "./schema.js";
 import { APIError } from "better-auth";
 import { hasPermission } from "@/src/middleware/auth.js";
+import { userRepo } from "../users/usersRepo.js";
 
 const factory = createFactory();
 
@@ -154,6 +155,60 @@ export const unassignCandidate = factory.createHandlers(
       if (err instanceof APIError) throw err;
       throw new APIError("INTERNAL_SERVER_ERROR", {
         message: "Failed to unassign candidate",
+        cause: err,
+      });
+    }
+  },
+);
+
+export const autoAssignCandidates = factory.createHandlers(
+  hasPermission({
+    resource: "candidate",
+    action: "assign_exam",
+  }),
+  sValidator("param", z.object({ examId: z.uuid() })),
+  sValidator(
+    "json",
+    z.object({
+      total: z.coerce.number(),
+    }),
+  ),
+  async (c) => {
+    const examId = c.req.valid("param").examId;
+    const { total } = c.req.valid("json");
+    try {
+      let candidates: { password: string; id: string; username: string }[] = [];
+      for (let i = 0; i < Number(total); i++) {
+        const generateCandidate = await userRepo.generateFakeCandidate(c);
+        candidates.push({
+          ...generateCandidate,
+        });
+      }
+      const inserted = await examCandidatesRepo.assignCandidates(examId, {
+        candidates: candidates.map((c) => ({
+          candidateId: c.id,
+          assignmentStatus: "ASSIGNED",
+        })),
+      });
+      const skipped = candidates.length - inserted.length;
+      return c.json({
+        data: inserted.map((c) => ({
+          ...c,
+          password: candidates.find((can) => can.id === c.candidateId)
+            ?.password,
+          username: candidates.find((can) => can.id === c.candidateId)
+            ?.username,
+        })),
+        success: true,
+        message:
+          skipped > 0
+            ? `${inserted.length} candidate(s) assigned, ${skipped} already existed.`
+            : `${inserted.length} candidate(s) assigned successfully.`,
+      });
+    } catch (err) {
+      if (err instanceof APIError) throw err;
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to assign candidates",
         cause: err,
       });
     }

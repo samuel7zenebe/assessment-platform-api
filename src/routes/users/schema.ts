@@ -7,6 +7,41 @@ import {
 } from "@/src/lib/schema.js";
 import z from "zod";
 
+export const UserSchema = z.object({
+  id: z.string().min(1), // text primary key
+
+  firstName: z.string().max(255).nullable().optional(),
+  lastName: z.string().max(255).nullable().optional(),
+
+  name: z.string().min(1),
+
+  email: z.string().email().min(1),
+
+  emailVerified: z.boolean().default(false),
+
+  image: z.string().url().nullable().optional(),
+
+  passwordHash: z.string().nullable().optional(),
+
+  role: userRoleSchema.default("CANDIDATE"),
+
+  isActive: z.boolean().default(true),
+
+  banned: z.boolean().nullable().optional(),
+  banReason: z.string().nullable().optional(),
+  banExpires: z.date().nullable().optional(), // or z.string().datetime() if using strings
+
+  // Username plugin fields
+  username: z.string().max(255).nullable().optional(),
+  displayUsername: z.string().nullable().optional(),
+
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+  deletedAt: z.date().nullable().optional(),
+});
+//
+// export const GenerateCandidateSchema
+
 const GetUsersQuerySchema = z.object({
   limit: z.coerce.number().optional().default(100),
   offset: z.coerce.number().optional().default(0),

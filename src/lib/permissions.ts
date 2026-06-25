@@ -5,7 +5,7 @@ const statement = {
   ...defaultStatements,
   exam: ["create", "update", "delete", "read"],
   question: ["create", "update", "delete", "read"],
-  candidate: ["assign_exam", "unassign_exam", "list"],
+  candidate: ["assign_exam", "unassign_exam", "list", "update"],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -14,7 +14,7 @@ export const ADMIN = ac.newRole({
   ...adminAc.statements,
   exam: ["create", "update", "delete", "read"],
   question: ["create", "update", "delete", "read"],
-  candidate: ["assign_exam", "unassign_exam", "list"],
+  candidate: ["assign_exam", "unassign_exam", "list", "update"],
 });
 
 export const BUILDER = ac.newRole({

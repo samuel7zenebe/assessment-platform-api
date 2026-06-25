@@ -73,13 +73,32 @@ export const QuestionBankRepo = {
   ) => {
     const { choices, jobTitles, ...questionBankData } = data;
 
-    console.log(" JobTitles: ", jobTitles);
-    console.log("Choices : ", choices);
+    // console.log(" JobTitles: ", jobTitles);
+    // console.log("Choices : ", choices);
 
     return db.transaction(async (tx) => {
       const [questionBankDataRow] = await tx
         .insert(questionBank)
-        .values(questionBankData)
+        .values({
+          audioUrl: questionBankData.audioUrl,
+          category: questionBankData.category,
+          question: questionBankData.question,
+          createdBy: questionBankData.createdBy,
+          difficultyLabel: questionBankData.difficultyLabel,
+          estimatedTimeSeconds: questionBankData.estimatedTimeSeconds,
+          explanation: questionBankData.explanation,
+          imageUrl: questionBankData.imageUrl,
+          isActive: questionBankData.isActive,
+          isPublic: questionBankData.isPublic,
+          points: questionBankData.points,
+          title: questionBankData.title,
+          type: questionBankData.type,
+          version: questionBankData.version,
+          videoUrl: questionBankData.videoUrl,
+          updatedAt: questionBankData.updatedAt
+            ? new Date(questionBankData.updatedAt)
+            : new Date(),
+        })
         .returning({
           questionBankId: questionBank.id,
         });
@@ -98,7 +117,7 @@ export const QuestionBankRepo = {
       const jobTitlesData = await tx
         .select()
         .from(JobTitlesSchema)
-        .where(inArray(JobTitlesSchema.id, jobTitles));
+        .where(inArray(JobTitlesSchema.titleName, jobTitles));
 
       const formattedQuestionJobTitles = jobTitlesData.map((jt) => ({
         jobTitleId: jt.id,

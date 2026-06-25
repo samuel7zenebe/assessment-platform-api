@@ -81,6 +81,29 @@ export const getExamById = factory.createHandlers(
     }
   },
 );
+/// ---GET /title/:title -> get exam by title
+export const getExamByTitle = factory.createHandlers(
+  hasPermission({ resource: "exam", action: "read" }),
+  sValidator("param", z.object({ title: z.string() })),
+  async (c) => {
+    try {
+      const exam_title = c.req.valid("param").title;
+      const [data] = await examRepo.getExamByTitle(exam_title);
+      if (!data)
+        throw new APIError("NOT_FOUND", {
+          message: "Exam not found",
+          status: 404,
+        });
+      return c.json({ data, success: true }, { status: 200 });
+    } catch (err) {
+      if (err instanceof APIError) throw err;
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "An error occurred while fetching the exam",
+        cause: err,
+      });
+    }
+  },
+);
 
 // ── POST   /     → create exam ───────────────────────────────────────────────
 export const createExam = factory.createHandlers(
@@ -107,7 +130,7 @@ export const createExam = factory.createHandlers(
       totalQuestions: exam.totalQuestions,
     });
 
-    console.log(" Distribution : ", distribution);
+    console.log(" Distribution : ", examData.id);
 
     return c.json(
       {
@@ -469,6 +492,35 @@ export const getExamStatistics = factory.createHandlers(
       if (err instanceof APIError) throw err;
       throw new APIError("INTERNAL_SERVER_ERROR", {
         message: "Failed to fetch exam statistics",
+        cause: err,
+      });
+    }
+  },
+);
+
+// ------- POST /:id/attempts ====> get attempts list of the exm
+
+export const getExamAttempts = factory.createHandlers(
+  sValidator(
+    "param",
+    z.object({
+      id: z.string(),
+    }),
+  ),
+  async (c) => {
+    try {
+      const examId = c.req.valid("param").id;
+      const candidateId = c.get("user").id;
+
+      const examAttempts = await examRepo.getExamAttempts({
+        candidateId,
+        examId,
+      });
+      return c.json({ data: examAttempts, success: true }, { status: 200 });
+    } catch (err) {
+      if (err instanceof APIError) throw err;
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch exam attempts ",
         cause: err,
       });
     }

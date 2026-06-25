@@ -2,12 +2,13 @@ import { db } from "@/src/db/index.js";
 import {
   answers,
   attemptQuestions,
+  examAttempts,
   questionBank,
   questionChoices,
 } from "@/src/db/schema.js";
 import type z from "zod";
 import type { SubmitAnswerSchema, GradeAnswerSchema } from "./schema.js";
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { APIError } from "better-auth";
 
 export const attemptQuestionAnswerRepo = {
@@ -19,15 +20,15 @@ export const attemptQuestionAnswerRepo = {
       .from(attemptQuestions)
       .where(eq(attemptQuestions.id, data.attemptQuestionId));
 
-    if (!attempt) throw new APIError("NOT_FOUND", { message: "Attempt question not found" });
+    if (!attempt)
+      throw new APIError("NOT_FOUND", {
+        message: "Attempt question not found",
+      });
 
     const correctChoice = await db
       .select()
       .from(questionChoices)
-      .innerJoin(
-        questionBank,
-        eq(questionBank.id, questionChoices.questionId),
-      )
+      .innerJoin(questionBank, eq(questionBank.id, questionChoices.questionId))
       .where(
         and(
           eq(questionChoices.questionId, attempt.questionId),
@@ -42,19 +43,25 @@ export const attemptQuestionAnswerRepo = {
 
     if (data.selectedChoiceId && data.selectedChoiceId === correctChoiceId) {
       isCorrect = true;
-      awardedPoints = correctChoice[0]?.question_bank?.points?.toString() ?? "0";
+      awardedPoints =
+        correctChoice[0]?.question_bank?.points?.toString() ?? "0";
     }
 
     if (typeof data.booleanAnswer === "boolean") {
       const questionData = correctChoice[0]?.question_bank;
       if (questionData?.questionData?.booleanAnswer !== undefined) {
-        isCorrect = data.booleanAnswer === questionData.questionData.booleanAnswer;
-        awardedPoints = isCorrect && questionData.points ? questionData.points.toString() : "0";
+        isCorrect =
+          data.booleanAnswer === questionData.questionData.booleanAnswer;
+        awardedPoints =
+          isCorrect && questionData.points
+            ? questionData.points.toString()
+            : "0";
       }
     }
 
     if (data.answerJson) {
-      awardedPoints = correctChoice[0]?.question_bank?.points?.toString() ?? "0";
+      awardedPoints =
+        correctChoice[0]?.question_bank?.points?.toString() ?? "0";
     }
 
     const [answerRecord] = await db
@@ -149,7 +156,10 @@ export const attemptQuestionAnswerRepo = {
         .set({
           isCorrect: grade.isCorrect,
           awardedPoints: grade.awardedPoints.toString(),
-          manuallyReviewed: typeof grade.manuallyReviewed === "boolean" ? grade.manuallyReviewed : true,
+          manuallyReviewed:
+            typeof grade.manuallyReviewed === "boolean"
+              ? grade.manuallyReviewed
+              : true,
           reviewerFeedback: grade.reviewerFeedback ?? null,
           updatedAt: new Date(),
         })
@@ -162,10 +172,30 @@ export const attemptQuestionAnswerRepo = {
 
   getAllAttemptAnswers: async (examAttemptId: string) => {
     return await db
-      .select()
+      .select({
+        answerId: answers.id,
+        questionId: attemptQuestions.questionId,
+        order: attemptQuestions.questionOrder,
+        selectedChoiceId: answers.selectedChoiceId,
+        attemptId: attemptQuestions.attemptId,
+        attemptNumber: examAttempts.attemptNumber,
+        examId: examAttempts.examId,
+      })
       .from(answers)
-      .leftJoin(attemptQuestions, eq(attemptQuestions.id, answers.attemptQuestionId))
-      .where(eq(attemptQuestions.attemptId, examAttemptId));
+      .leftJoin(
+        attemptQuestions,
+        eq(attemptQuestions.id, answers.attemptQuestionId),
+      )
+      .leftJoin(examAttempts, eq(examAttempts.id, examAttemptId))
+      .where(eq(attemptQuestions.attemptId, examAttemptId))
+      .groupBy(
+        answers.id,
+        attemptQuestions.questionId,
+        attemptQuestions.questionOrder,
+        attemptQuestions.attemptId,
+        examAttempts.attemptNumber,
+        examAttempts.examId,
+      );
   },
 
   getAnswerStatistics: async (filters: {
@@ -186,7 +216,12 @@ export const attemptQuestionAnswerRepo = {
       allRows = await db
         .select()
         .from(answers)
-        .where(inArray(answers.attemptQuestionId, attemptQAIds.map((r) => r.id)));
+        .where(
+          inArray(
+            answers.attemptQuestionId,
+            attemptQAIds.map((r) => r.id),
+          ),
+        );
     } else if (filters.attemptQuestionId) {
       allRows = await db
         .select()
@@ -204,7 +239,10 @@ const computeStats = (rows: (typeof answers.$inferSelect)[]) => {
   const totalAnswers = rows.length;
   const correctAnswers = rows.filter((r) => r.isCorrect).length;
   const manuallyReviewed = rows.filter((r) => r.manuallyReviewed).length;
-  const totalAwarded = rows.reduce((sum, r) => sum + parseFloat(r.awardedPoints ?? "0"), 0);
+  const totalAwarded = rows.reduce(
+    (sum, r) => sum + parseFloat(r.awardedPoints ?? "0"),
+    0,
+  );
 
   return {
     totalAnswers,

@@ -8,7 +8,7 @@ import {
 
 export const gradingRouter = new Hono()
 
-  // ── Grading queue ─────────────────────────────────────────────────────────
+  // ── Grading queue ──────────────────────────────────────────────────────
   .get("/queue", ...getGradingQueue)
 
   // ── Attempt review ───────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { usersSchemas } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
 import { APIError } from "better-auth";
 import z4 from "zod/v4";
+import { hasPermission } from "@/src/middleware/auth.js";
 
 const factory = createFactory<{}>();
 
@@ -278,3 +279,56 @@ export const getMe = factory.createHandlers(async (c) => {
     });
   }
 });
+
+export const getUserExams = factory.createHandlers(async (c) => {
+  try {
+    const { id } = c.get("user");
+    const userExams = await userRepo.userExams(id);
+
+    return c.json({
+      data: userExams,
+      message: "user exams were successfully fetched",
+      success: true,
+    });
+  } catch (err) {
+    console.log(err);
+    if (err instanceof APIError) {
+      throw new HTTPException(403, {
+        message: err.message,
+        cause: err.body,
+      });
+    }
+    console.log("Error Occured : ");
+    throw new HTTPException(500, {
+      message: "Internal Sever Error",
+      cause: err instanceof Error ? err.cause : "unknown",
+    });
+  }
+});
+
+export const generateFakeCandidate = factory.createHandlers(
+  hasPermission({ action: "update", resource: "candidate" }),
+  async (c) => {
+    try {
+      const generateCandidate = await userRepo.generateFakeCandidate(c);
+      return c.json({
+        data: generateCandidate,
+        message: "candidate was generate successfully",
+        success: true,
+      });
+    } catch (err) {
+      console.log(err);
+      if (err instanceof APIError) {
+        throw new HTTPException(403, {
+          message: err.message,
+          cause: err.body,
+        });
+      }
+      console.log("Error Occured : ");
+      throw new HTTPException(500, {
+        message: "Internal Sever Error",
+        cause: err instanceof Error ? err.cause : "unknown",
+      });
+    }
+  },
+);

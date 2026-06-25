@@ -79,7 +79,7 @@ export const QuestionBankCreateSchema = z.object({
   videoUrl: z.string().optional().nullable(),
   explanation: z.string().optional(),
   estimatedTimeSeconds: z.coerce.number().default(60),
-  questionData: QuestionDataSchema.partial(),
+  questionData: QuestionDataSchema.partial().optional(),
   version: z.coerce.number<number>().optional().default(1),
   points: z.coerce
     .number()
@@ -89,6 +89,9 @@ export const QuestionBankCreateSchema = z.object({
   isPublic: z.coerce.boolean<boolean>().optional().default(false),
   isActive: z.coerce.boolean<boolean>().optional().default(false),
   createdBy: z.string(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  title: z.string().optional(),
   choices: z
     .array(QuestionChoiceSchema)
     .min(2, "At least two choices are required"),

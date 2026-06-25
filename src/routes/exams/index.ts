@@ -14,6 +14,8 @@ import {
   closeExam,
   regenerateExamQuestions,
   getExamCategories,
+  getExamAttempts,
+  getExamByTitle,
 } from "./examsController.js";
 import {
   addQuestionToExam,
@@ -28,6 +30,7 @@ import {
 } from "../exam-job-titles/examJobTitlesController.js";
 import {
   assignCandidates,
+  autoAssignCandidates,
   listCandidates,
   unassignCandidate,
   updateAssignmentStatus,
@@ -40,6 +43,7 @@ export const examsRouter = new Hono()
   .get("/categories", ...getExamCategories)
   .post("/", ...createExam)
   .get("/:id", ...getExamById)
+  .get("/title/:title", ...getExamByTitle)
   .put("/:id", ...updateExam)
   .delete("/:id", ...deleteExam)
 
@@ -67,8 +71,10 @@ export const examsRouter = new Hono()
   //  Admin only
   .get("/:examId/candidates", ...listCandidates)
   // List assigned candidates + assignemntStatus
+  .post("/:examId/candidates/auto-assign", ...autoAssignCandidates)
   .post("/:examId/candidates", ...assignCandidates)
   //Assign one or many { candidateIds: [] }
   .patch("/:examId/:candidateId/status", ...updateAssignmentStatus)
   // DELETE /exams/:examId/candidates/:candidateId → unassign candidate
-  .delete("/:examId/candidates/:candidateId", ...unassignCandidate);
+  .delete("/:examId/candidates/:candidateId", ...unassignCandidate)
+  .get("/:id/attempts", ...getExamAttempts);

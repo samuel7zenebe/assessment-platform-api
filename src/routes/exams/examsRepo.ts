@@ -23,6 +23,8 @@ import {
 } from "./utils.js";
 import { APIError } from "better-auth";
 import type { examStatusSchema } from "@/src/lib/schema.js";
+import { examAttemptsRepo } from "../exam-attempts/examAttemptsRepo.js";
+import { auth } from "@/src/lib/auth.js";
 
 export const examRepo = {
   findAllExams: async () => {
@@ -30,7 +32,7 @@ export const examRepo = {
       .select()
       .from(exams)
       .orderBy(exams.createdAt)
-      .limit(20)
+      .limit(100)
       .offset(0);
   },
 
@@ -175,7 +177,9 @@ export const examRepo = {
 
     return exam_candidates[0];
   },
-
+  getExamByTitle: async (title: string) => {
+    return db.select().from(exams).where(eq(exams.title, title)).limit(1);
+  },
   getExamQuestions: async (examId: string) => {
     return await db
       .select()
@@ -223,7 +227,6 @@ export const examRepo = {
       .returning();
     return updated;
   },
-
   archiveExam: async (examId: string) => {
     const statusVal: "ARCHIVED" = "ARCHIVED";
     const [updated] = await db
@@ -333,6 +336,18 @@ export const examRepo = {
         incorrectAnswers: totalAnswersCount - totalCorrectAnswers,
       },
     };
+  },
+  getExamAttempts: async ({
+    candidateId,
+    examId,
+  }: {
+    examId: string;
+    candidateId: string;
+  }) => {
+    return examAttemptsRepo.listAttempts({
+      examId,
+      candidateId,
+    });
   },
 };
 

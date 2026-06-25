@@ -89,3 +89,22 @@ export const strictBooleanSchema = z.preprocess((val) => {
 export const sortDirectionSchema = z.enum(["asc", "desc"]);
 
 export const userFieldsSchema = z.enum(["name", "email"]);
+
+/// Resource permissions
+
+export const ResourceTypeSchema = z.enum([
+  "JOB_TITLE",
+  "DEPARTMENT",
+  "QUESTION",
+  "EXAM",
+]);
+
+export const ResourcePermissionSchema = z.enum([
+  "VIEW",
+  "CREATE",
+  "UPDATE",
+  "DELETE",
+  "PUBLISH",
+  "ASSIGN",
+  "MANAGE",
+]);

@@ -101,6 +101,8 @@ export const user = pgTable(
 
     isActive: boolean("is_active").default(true).notNull(),
 
+    temporaryCandidate: boolean("temporary_candidate").default(false).notNull(),
+
     banned: boolean("banned"),
 
     banReason: text("ban_reason"),
@@ -260,7 +262,9 @@ export const exams = pgTable(
 
     title: varchar("title", {
       length: 255,
-    }).notNull(),
+    })
+      .notNull()
+      .unique(),
 
     category: varchar("category", {
       length: 255,
@@ -860,9 +864,104 @@ export const auditLogs = pgTable("audit_logs", {
     .notNull(),
 });
 
+/// Resource permissions
+
+export const resourceTypeEnum = pgEnum("resource_type", [
+  "JOB_TITLE",
+  "DEPARTMENT",
+  "QUESTION",
+  "EXAM",
+]);
+
+export const resourcePermissionEnum = pgEnum("resource_permission", [
+  "VIEW",
+  "CREATE",
+  "UPDATE",
+  "DELETE",
+  "PUBLISH",
+  "ASSIGN",
+  "MANAGE",
+]);
+
+export const resourcePermissions = pgTable(
+  "resource_permissions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, {
+        onDelete: "cascade",
+      }),
+
+    resourceType: resourceTypeEnum("resource_type").notNull(),
+
+    /*
+      ID of the resource.
+      Example:
+      JOB_TITLE      -> job_titles.id
+      DEPARTMENT     -> departments.id
+      QUESTION       -> question_bank.id
+      EXAM           -> exams.id
+    */
+    resourceId: uuid("resource_id").notNull(),
+
+    permission: resourcePermissionEnum("permission").notNull(),
+
+    grantedBy: text("granted_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+
+    grantedAt: timestamp("granted_at", {
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull(),
+
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+    }),
+
+    notes: text("notes"),
+  },
+  (table) => [
+    unique("resource_permission_unique").on(
+      table.userId,
+      table.resourceType,
+      table.resourceId,
+      table.permission,
+    ),
+
+    index("resource_permission_user_idx").on(table.userId),
+
+    index("resource_permission_resource_idx").on(
+      table.resourceType,
+      table.resourceId,
+    ),
+
+    index("resource_permission_permission_idx").on(table.permission),
+  ],
+);
+
 /* =========================================================
    RELATIONS
 ========================================================= */
+
+export const resourcePermissionRelations = relations(
+  resourcePermissions,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [resourcePermissions.userId],
+      references: [user.id],
+    }),
+
+    grantedByUser: one(user, {
+      fields: [resourcePermissions.grantedBy],
+      references: [user.id],
+      relationName: "permission_granted_by",
+    }),
+  }),
+);
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
