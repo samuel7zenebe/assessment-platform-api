@@ -35,12 +35,27 @@ export const UserSchema = z.object({
   username: z.string().max(255).nullable().optional(),
   displayUsername: z.string().nullable().optional(),
 
+  temporaryCandidate: z.boolean().default(false),
+
+  departmentId: z.string().optional(),
+
+  jobTitleId: z.string().optional(),
+
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().default(() => new Date()),
   deletedAt: z.date().nullable().optional(),
 });
 //
 // export const GenerateCandidateSchema
+
+export const CreateUserSchema = UserSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+}).extend({
+  password: z.string().min(8).max(255),
+});
 
 const GetUsersQuerySchema = z.object({
   limit: z.coerce.number().optional().default(100),
@@ -53,6 +68,7 @@ const GetUsersQuerySchema = z.object({
   filterOperator: filterOperatorSchema.optional(),
   sortBy: userFieldsSchema.optional(),
   sortDirection: sortDirectionSchema.optional(),
+  role: z.array(userRoleSchema).optional(),
 });
 
 const GetUserParamsSchema = z.object({
@@ -74,9 +90,16 @@ const updateUserBodySchema = z.object({
   id: z.string(),
   name: z.string().optional(),
   email: z.string().email().optional(),
-  avatarUrl: z.string().url().optional(),
+  image: z.string().nullable().optional(),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
+  username: z.string().max(255).nullable().optional(),
+  displayUsername: z.string().nullable().optional(),
+  role: userRoleSchema.optional(),
+  isActive: z.boolean().optional(),
+  temporaryCandidate: z.boolean().optional(),
+  departmentId: z.string().optional(),
+  jobTitleId: z.string().optional(),
 });
 
 const deleteUserParamsSchema = z.object({
@@ -102,6 +125,7 @@ const revokeSessionBodySchema = z.object({
 });
 
 export const usersSchemas = {
+  CreateUserSchema,
   GetUsersQuerySchema,
   GetUserParamsSchema,
   banUserBodySchema,
@@ -113,3 +137,6 @@ export const usersSchemas = {
   revokeSessionBodySchema,
   revokeUserSessionsParamSchema,
 };
+
+export type CreateUserType = z.infer<typeof CreateUserSchema>;
+export type UpdateUserType = z.infer<typeof updateUserBodySchema>;

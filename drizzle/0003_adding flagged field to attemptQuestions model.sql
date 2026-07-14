@@ -1,0 +1,1 @@
+ALTER TABLE "attempt_questions" ADD COLUMN "flagged" boolean DEFAULT false;

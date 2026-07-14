@@ -3,25 +3,24 @@ import { QuestionBankRepo } from "./questionBankRepo.js";
 import { sValidator } from "@hono/standard-validator";
 import {
   QuestionBankCreateSchema,
+  QuestionBankSchema,
   QuestionBankSearchSchema,
   UpdateQuestionBankSchema,
 } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
 import { db } from "@/src/db/index.js";
-import { ilike, isNull, and, isNotNull, inArray, eq, or } from "drizzle-orm";
-import {
-  questionBank,
-  user,
-  questionJobTitles,
-  jobTitles,
-} from "@/src/db/schema.js";
+import { ilike, isNull, and, inArray, eq, or } from "drizzle-orm";
+import { questionBank, user, questionJobTitles } from "@/src/db/schema.js";
 import z from "zod";
-import { hasPermission } from "@/src/middleware/auth.js";
+import { checkPermission, hasPermission } from "@/src/middleware/auth.js";
+import { IdParamSchema } from "@/src/lib/schemas/common.js";
 import { parseQuestionBankExcel } from "@/src/lib/parse-excel-questions.js";
 import { getJobTitleIds, getUserByEmail } from "@/src/lib/helper-funs.js";
+import { APIError } from "better-auth";
 
 const factory = createFactory<{}>();
 
+// ── GET    /     → list questions ─────────────────────────────────────────────
 export const getQuestions = factory.createHandlers(
   sValidator("query", QuestionBankSearchSchema),
   async (c) => {
@@ -34,6 +33,8 @@ export const getQuestions = factory.createHandlers(
       pageSize = 10,
       pageNumber = 1,
     } = c.req.valid("query");
+
+    console.log("Include Deleted ", includeDeleted);
 
     try {
       let conditions = [];
@@ -74,18 +75,16 @@ export const getQuestions = factory.createHandlers(
         );
       }
 
-      // For testing it shall be enabled later
-      // const { id: userId } = c.get("user");
-
-      // conditions.push(eq(questionBank.createdBy, userId));
-
       const questionsData = await QuestionBankRepo.findAllQuestions({
         pageSize: Number(pageSize),
         pageNumber: Number(pageNumber),
         conditions: conditions.length > 0 ? and(...conditions) : undefined,
       });
 
-      const totalQuestions = await db.select().from(questionBank);
+      const totalQuestions = await db
+        .select()
+        .from(questionBank)
+        .where(includeDeleted ? isNull(questionBank.deletedAt) : undefined);
 
       return c.json({
         data: questionsData,
@@ -102,6 +101,7 @@ export const getQuestions = factory.createHandlers(
   },
 );
 
+// ── GET    /categories     → list question categories ─────────────────────────
 export const getAllCategories = factory.createHandlers(async (c) => {
   try {
     const categories = await QuestionBankRepo.getAllCategories();
@@ -124,8 +124,9 @@ export const getAllCategories = factory.createHandlers(async (c) => {
   }
 });
 
+// ── GET    /:id  → get question by id ──────────────────────────────────────
 export const getQuestionById = factory.createHandlers(
-  sValidator("param", z.object({ id: z.uuid() })),
+  sValidator("param", IdParamSchema),
   async (c) => {
     const { id } = c.req.valid("param");
     try {
@@ -149,11 +150,8 @@ export const getQuestionById = factory.createHandlers(
   },
 );
 
+// ── POST   /     → create question ───────────────────────────────────────────
 export const createQuestion = factory.createHandlers(
-  hasPermission({
-    resource: "question",
-    action: "create",
-  }),
   sValidator(
     "json",
     QuestionBankCreateSchema.omit({
@@ -161,17 +159,10 @@ export const createQuestion = factory.createHandlers(
     }),
   ),
   async (c) => {
-    const { id: userId, role: userRole } = c.get("user" as any);
-
-    if (userRole === "CANDIDATE") {
-      throw new HTTPException(403, {
-        message: "Current user is not allowed to store question",
-        cause: "Unauthorized Access ",
-      });
-    }
+    const { id: userId } = c.get("user" as any);
 
     const validData = c.req.valid("json");
-    console.log("Valid Data: ", validData);
+
     try {
       const newQuestionId = await QuestionBankRepo.createQuestionBankRecord({
         ...validData,
@@ -201,21 +192,12 @@ export const createQuestion = factory.createHandlers(
   },
 );
 
+// ── POST   /batch  → create questions in batch ──────────────────────────────────
 export const createQuestionInBatch = factory.createHandlers(
-  hasPermission({
-    resource: "question",
-    action: "create",
-  }),
+  hasPermission({ resource: "QUESTION", permission: "CREATE" }),
   sValidator("json", z.array(QuestionBankCreateSchema)),
   async (c) => {
-    const { id: userId, role: userRole } = c.get("user" as any);
-
-    if (userRole === "CANDIDATE") {
-      throw new HTTPException(403, {
-        message: "Current user is not allowed to store question",
-        cause: "Unauthorized Access ",
-      });
-    }
+    const { id: userId } = c.get("user" as any);
 
     const validData = c.req.valid("json");
     try {
@@ -245,11 +227,9 @@ export const createQuestionInBatch = factory.createHandlers(
   },
 );
 
+// ── POST   /batch/upload  → create questions from Excel ───────────────────────────
 export const createQuestionInBatchExcel = factory.createHandlers(
-  hasPermission({
-    resource: "question",
-    action: "create",
-  }),
+  hasPermission({ resource: "QUESTION", permission: "CREATE" }),
   sValidator(
     "form",
     z.object({
@@ -266,14 +246,7 @@ export const createQuestionInBatchExcel = factory.createHandlers(
     }),
   ),
   async (c) => {
-    const { id: userId, role: userRole } = c.get("user" as any);
-
-    if (userRole === "CANDIDATE") {
-      throw new HTTPException(403, {
-        message: "Current user is not allowed to store question",
-        cause: "Unauthorized Access ",
-      });
-    }
+    const { id: userId } = c.get("user" as any);
 
     const file = c.req.valid("form").file;
     try {
@@ -296,6 +269,7 @@ export const createQuestionInBatchExcel = factory.createHandlers(
 
       let newQuestionId = [];
       for (const question of questions) {
+        console.log("EMAIL: ", question.createdBy);
         const creator = await getUserByEmail({
           email: question.createdBy,
         });
@@ -332,6 +306,30 @@ export const createQuestionInBatchExcel = factory.createHandlers(
           );
         }
 
+        for (let id of jobTitleIds.data.jobTitleIds) {
+          const hasPermission = await checkPermission({
+            userId: creator.data.id,
+            action: "CREATE",
+            resource: "QUESTION",
+            scope: "JOB_TITLE",
+            scopeId: id,
+          });
+
+          console.log("Permissions : ", hasPermission);
+          if (!hasPermission) {
+            // throw new APIError("UNAUTHORIZED", {
+            //   cause: "Unauthorized access",
+            //   message: "User has no enough permission to add questions.",
+            // });
+
+            return c.json({
+              success: false,
+              data: null,
+              message: "User has no enough permission to add questions.",
+            });
+          }
+        }
+
         const newQuestion = await QuestionBankRepo.createQuestionBankRecord({
           ...question,
           createdBy: creator.data?.id,
@@ -356,7 +354,10 @@ export const createQuestionInBatchExcel = factory.createHandlers(
     }
   },
 );
+
+// ── PATCH  /:id  → update question ───────────────────────────────────────────
 export const updateQuestion = factory.createHandlers(
+  hasPermission({ resource: "QUESTION", permission: "UPDATE" }),
   sValidator(
     "param",
     z.object({
@@ -390,8 +391,9 @@ export const updateQuestion = factory.createHandlers(
   },
 );
 
-// Soft Delete a Question
+// ── DELETE /:id  → soft delete question ───────────────────────────────────────
 export const softDeleteQuestion = factory.createHandlers(
+  hasPermission({ resource: "QUESTION", permission: "DELETE" }),
   sValidator("param", z.object({ id: z.string().min(1) })),
   async (c) => {
     const { id } = c.req.valid("param");
@@ -413,7 +415,9 @@ export const softDeleteQuestion = factory.createHandlers(
   },
 );
 
+// ── DELETE /:id  → hard delete question ───────────────────────────────────────
 export const deleteQuestion = factory.createHandlers(
+  hasPermission({ resource: "QUESTION", permission: "DELETE" }),
   sValidator("param", z.object({ id: z.string().min(1) })),
   async (c) => {
     const { id } = c.req.valid("param");

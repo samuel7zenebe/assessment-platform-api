@@ -1,43 +1,39 @@
 ﻿import { createFactory } from "hono/factory";
 import { sValidator } from "@hono/standard-validator";
 import { HTTPException } from "hono/http-exception";
-import { hasPermission } from "@/src/middleware/auth.js";
 import { examJobTitlesRepo } from "./examJobTitlesRepo.js";
 import {
   CreateExamJobTitleSchema,
   DeleteExamJobTitleSchema,
+  ExamJobTitleIdSchema,
   UpdateExamJobTitleSchema,
 } from "./schema.js";
+import { IdParamSchema } from "@/src/lib/schemas/common.js";
 import z from "zod";
 
 const factory = createFactory();
 
-const GetExamJobTitlesSchema = z.object({
-  id: z.string().uuid(),
+// ── GET  /exam-job-titles  → list all ─────────────────────────────────────
+export const getAllExamJobTitles = factory.createHandlers(async (c) => {
+  try {
+    const examJobTitles = await examJobTitlesRepo.findAll();
+
+    return c.json({ data: examJobTitles, success: true }, { status: 200 });
+  } catch (error) {
+    if (error instanceof HTTPException) throw error;
+    throw new HTTPException(500, {
+      cause: "Internal Server Error",
+      message: "An error occurred while fetching exam-job-titles",
+    });
+  }
 });
 
-export const getAllExamJobTitles = factory.createHandlers(
-  hasPermission({ resource: "exam", action: "read" }),
-  async (c) => {
-    try {
-      const examJobTitles = await examJobTitlesRepo.findAll();
-
-      return c.json({ data: examJobTitles, success: true }, { status: 200 });
-    } catch (error) {
-      if (error instanceof HTTPException) throw error;
-      throw new HTTPException(500, {
-        cause: "Internal Server Error",
-        message: "An error occurred while fetching exam-job-titles",
-      });
-    }
-  },
-);
+// ── GET  /:id  → get exam job titles by exam id ─────────────────────────────
 export const getExamJobTitlesByExamId = factory.createHandlers(
-  hasPermission({ resource: "exam", action: "read" }),
-  sValidator("param", GetExamJobTitlesSchema),
+  sValidator("param", z.object({ examId: z.uuid() })),
   async (c) => {
     try {
-      const { id: examId } = c.req.valid("param");
+      const { examId } = c.req.valid("param");
       const data = await examJobTitlesRepo.findExamJobTitles(examId);
       return c.json(
         {
@@ -54,12 +50,13 @@ export const getExamJobTitlesByExamId = factory.createHandlers(
     }
   },
 );
+
+// ── GET  /:id  → get exam job titles by job title id ───────────────────────
 export const getExamJobTitlesByJobTitleId = factory.createHandlers(
-  hasPermission({ resource: "exam", action: "read" }),
-  sValidator("param", GetExamJobTitlesSchema),
+  sValidator("param", z.object({ jobTitleId: z.uuid() })),
   async (c) => {
     try {
-      const { id: jobTitleId } = c.req.valid("param");
+      const { jobTitleId } = c.req.valid("param");
       const data =
         await examJobTitlesRepo.findExamJobTitlesByJobTitleId(jobTitleId);
       return c.json(
@@ -77,14 +74,10 @@ export const getExamJobTitlesByJobTitleId = factory.createHandlers(
     }
   },
 );
+
+// ── GET  /:id  → get exam job title by id ───────────────────────────────────
 export const getExamJobTitlesById = factory.createHandlers(
-  hasPermission({ resource: "exam", action: "read" }),
-  sValidator(
-    "param",
-    z.object({
-      id: z.string(),
-    }),
-  ),
+  sValidator("param", IdParamSchema),
   async (c) => {
     try {
       const { id } = c.req.valid("param");
@@ -105,8 +98,8 @@ export const getExamJobTitlesById = factory.createHandlers(
   },
 );
 
+// ── POST  /:examId/:jobTitleId  → create exam job title ───────────────────────
 export const createExamJobTitle = factory.createHandlers(
-  hasPermission({ resource: "exam", action: "create" }),
   sValidator(
     "param",
     CreateExamJobTitleSchema.pick({
@@ -148,15 +141,9 @@ export const createExamJobTitle = factory.createHandlers(
   },
 );
 
-// Adding job-title to an existing exam-jobtitles
+// ── POST   /:id  → add job title to exam ─────────────────────────────────────
 export const addJobTitle = factory.createHandlers(
-  hasPermission({ resource: "exam", action: "create" }),
-  sValidator(
-    "param",
-    z.object({
-      id: z.uuid(),
-    }),
-  ),
+  sValidator("param", IdParamSchema),
   sValidator(
     "json",
     CreateExamJobTitleSchema.pick({
@@ -190,14 +177,9 @@ export const addJobTitle = factory.createHandlers(
   },
 );
 
+// ── PATCH  /:id/:jobTitleId  → edit exam job title ──────────────────────────
 export const editExamJobTitle = factory.createHandlers(
-  sValidator(
-    "param",
-    z.object({
-      id: z.string(),
-      jobTitleId: z.string(),
-    }),
-  ),
+  sValidator("param", ExamJobTitleIdSchema),
   sValidator(
     "json",
     UpdateExamJobTitleSchema.omit({
@@ -207,11 +189,11 @@ export const editExamJobTitle = factory.createHandlers(
   ),
   async (c) => {
     try {
-      const { id, jobTitleId } = c.req.valid("param");
+      const { examId, jobTitleId } = c.req.valid("param");
 
       const data = c.req.valid("json");
 
-      const result = await examJobTitlesRepo.update(id, jobTitleId, {
+      const result = await examJobTitlesRepo.update(examId, jobTitleId, {
         ...data,
       });
       if (!result.length) {
@@ -237,19 +219,13 @@ export const editExamJobTitle = factory.createHandlers(
   },
 );
 
+// ── DELETE /:id/:jobTitleId  → delete exam job title ─────────────────────────
 export const deleteExamJobTitle = factory.createHandlers(
-  hasPermission({ resource: "exam", action: "delete" }),
-  sValidator(
-    "param",
-    z.object({
-      id: z.uuid(),
-      jobTitleId: z.uuid(),
-    }),
-  ),
+  sValidator("param", ExamJobTitleIdSchema),
   async (c) => {
     try {
-      const { id, jobTitleId } = c.req.valid("param");
-      const result = await examJobTitlesRepo.delete(id, jobTitleId);
+      const { examId, jobTitleId } = c.req.valid("param");
+      const result = await examJobTitlesRepo.delete(examId, jobTitleId);
       if (!result.length) {
         throw new HTTPException(404, {
           message: "Exam job title not found",

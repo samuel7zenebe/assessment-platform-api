@@ -204,6 +204,74 @@ This is the hot path — keep it fast and atomic.
 
 ---
 
+## `/api/permission-policies` — Permission Management (ADMIN only)
+
+Permission policies grant granular access control to resources. Policies are scoped to `JOB_TITLE`, `DEPARTMENT`, or `FACTORY`.
+
+### Permission Policy Object
+
+```json
+{
+  "id": "uuid",
+  "userId": "string",
+  "resource": "QUESTION" | "EXAM" | "CANDIDATE",
+  "actions": ["VIEW", "CREATE", "UPDATE", "DELETE", "PUBLISH", "ASSIGN"],
+  "scope": "JOB_TITLE" | "DEPARTMENT" | "FACTORY",
+  "scopeId": "uuid",
+  "grantedBy": "string (optional)",
+  "expiresAt": "ISO date string (optional)",
+  "notes": "string (optional)"
+}
+```
+
+### Policy Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/permission-policies` | List all policies (filter by userId, resource, scope, scopeId) |
+| POST | `/api/permission-policies` | Create policy |
+| POST | `/api/permission-policies/bulk-create` | Create multiple policies |
+| POST | `/api/permission-policies/check` | Check if current user has permission on resource |
+| GET | `/api/permission-policies/:id` | Get single policy |
+| PATCH | `/api/permission-policies/:id` | Update actions, expiresAt, notes |
+| DELETE | `/api/permission-policies/:id` | Delete policy |
+
+### Create Policy Body
+
+```json
+{
+  "userId": "string",
+  "resource": "QUESTION" | "EXAM" | "CANDIDATE",
+  "actions": ["VIEW", "CREATE", "UPDATE", "DELETE", "PUBLISH", "ASSIGN"],
+  "scope": "JOB_TITLE" | "DEPARTMENT" | "FACTORY",
+  "scopeId": "uuid",
+  "grantedBy": "string (optional)",
+  "expiresAt": "ISO date string (optional)",
+  "notes": "string (optional, max 1000 chars)"
+}
+```
+
+### Check Permission Body
+
+```json
+{
+  "resource": "QUESTION" | "EXAM" | "CANDIDATE",
+  "action": "VIEW" | "CREATE" | "UPDATE" | "DELETE" | "PUBLISH" | "ASSIGN",
+  "scope": "JOB_TITLE" | "DEPARTMENT" | "FACTORY (optional)",
+  "scopeId": "uuid (optional)"
+}
+```
+
+### User-Specific Routes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/permission-policies/users/:userId` | List all policies for a user |
+| POST | `/api/permission-policies/users/:userId` | Create policy for user |
+| DELETE | `/api/permission-policies/users/:userId/:id` | Delete user policy |
+
+---
+
 ## Response Formats
 
 ### Success Response

@@ -1,13 +1,10 @@
 import * as XLSX from "xlsx";
 import type { z } from "zod";
-import {
-  QuestionBankCreateSchema,
-  QuestionChoiceSchema,
-} from "../routes/questions/schema.js";
-import { getUserByEmail } from "./helper-funs.js";
+import { QuestionBankCreateSchema } from "@/src/routes/questions/schema.js";
+import { QuestionChoiceInputSchema } from "@/src/lib/schemas/common.js";
 
 export type QuestionBankCreate = z.infer<typeof QuestionBankCreateSchema> & {
-  choices: z.infer<typeof QuestionChoiceSchema>[];
+  choices: z.infer<typeof QuestionChoiceInputSchema>[];
   jobTitles: string[];
 };
 
@@ -53,7 +50,7 @@ const splitColon = (val: string): string[] =>
 function buildChoices(
   raw: RawRow,
   correctSet: Set<string>,
-): z.infer<typeof QuestionChoiceSchema>[] {
+): z.infer<typeof QuestionChoiceInputSchema>[] {
   const keys = [
     "choice1_text",
     "choice2_text",
@@ -63,7 +60,7 @@ function buildChoices(
     "choice6_text",
   ] as const;
 
-  return keys.reduce<z.infer<typeof QuestionChoiceSchema>[]>(
+  return keys.reduce<z.infer<typeof QuestionChoiceInputSchema>[]>(
     (acc, key, idx) => {
       const text = str(raw[key]);
       if (!text || text.toUpperCase() === "N/A") return acc;
@@ -153,6 +150,8 @@ export async function parseQuestionBankExcel(file: File): Promise<{
     };
 
     const result = QuestionBankCreateSchema.safeParse(payload);
+
+    // console.log(payload);
 
     if (!result.success) {
       return {

@@ -1,4 +1,17 @@
 import {
+  USER_ROLE_VALUES,
+  QUESTION_TYPE_VALUES,
+  DIFFICULTY_LABEL_VALUES,
+  EXAM_STATUS_VALUES,
+  ASSIGNMENT_STATUS_VALUES,
+  ATTEMPT_STATUS_VALUES,
+  EXAM_GENERATION_MODE_VALUES,
+  RESOURCE_TYPE_VALUES,
+  RESOURCE_PERMISSION_VALUES,
+  PERMISSION_SCOPE_VALUES,
+} from "@/src/lib/schemas/enums.js";
+
+import {
   pgTable,
   text,
   varchar,
@@ -22,56 +35,49 @@ import type { QuestionDataSchema } from "@/src/routes/questions/schema.js";
    ENUMS
 ========================================================= */
 
-export const userRoleEnum = pgEnum("user_role", [
-  "CANDIDATE",
-  "ADMIN",
-  "BUILDER",
-  "SUPER_ADMIN",
-]);
+export const userRoleEnum = pgEnum("user_role", USER_ROLE_VALUES);
 
-export const questionTypeEnum = pgEnum("question_type", [
-  "CHOICE",
-  "MATCH",
-  "ESSAY",
-  "TRUE_FALSE",
-]);
+export const questionTypeEnum = pgEnum("question_type", QUESTION_TYPE_VALUES);
 
-export const difficultyLabelEnum = pgEnum("difficulty_level", [
-  "EASY",
-  "MEDIUM",
-  "HARD",
-]);
+export const difficultyLabelEnum = pgEnum(
+  "difficulty_level",
+  DIFFICULTY_LABEL_VALUES,
+);
 
-export const examStatusEnum = pgEnum("exam_status", [
-  "DRAFT",
-  "PUBLISHED",
-  "ACTIVE",
-  "CLOSED",
-  "ARCHIVED",
-]);
+export const examStatusEnum = pgEnum("exam_status", EXAM_STATUS_VALUES);
 
-export const assignmentStatusEnum = pgEnum("assignment_status", [
-  "ASSIGNED",
-  "STARTED",
-  "COMPLETED",
-  "EXPIRED",
-]);
+export const assignmentStatusEnum = pgEnum(
+  "assignment_status",
+  ASSIGNMENT_STATUS_VALUES,
+);
 
-export const attemptStatusEnum = pgEnum("attempt_status", [
-  "IN_PROGRESS",
-  "SUBMITTED",
-  "GRADED",
-  "EXPIRED",
-]);
+export const attemptStatusEnum = pgEnum(
+  "attempt_status",
+  ATTEMPT_STATUS_VALUES,
+);
 
-export const examGenerationModeEnum = pgEnum("exam_generation_mode", [
-  "QUESTION_COUNT",
-  "POINT_TARGET",
-  "HYBRID",
-]);
+export const examGenerationModeEnum = pgEnum(
+  "exam_generation_mode",
+  EXAM_GENERATION_MODE_VALUES,
+);
+
+export const permissionResourceEnum = pgEnum(
+  "permission_resource",
+  RESOURCE_TYPE_VALUES,
+);
+
+export const permissionActionEnum = pgEnum(
+  "permission_action",
+  RESOURCE_PERMISSION_VALUES,
+);
+
+export const permissionScopeEnum = pgEnum(
+  "permission_scope",
+  PERMISSION_SCOPE_VALUES,
+);
 
 /* =========================================================
-   BETTER AUTH TABLES
+  BETTER AUTH TABLES
 ========================================================= */
 
 export const user = pgTable(
@@ -114,6 +120,14 @@ export const user = pgTable(
     username: varchar("username", { length: 255 }).unique(),
     displayUsername: text("display_username"),
 
+    departmentId: text("department_id").references(() => departments.id, {
+      onDelete: "set null",
+    }),
+
+    jobTitleId: uuid("job_title_id").references(() => jobTitles.id, {
+      onDelete: "set null",
+    }),
+
     createdAt: timestamp("created_at", {
       withTimezone: true,
     })
@@ -134,6 +148,10 @@ export const user = pgTable(
     unique("user_email_unique").on(table.email),
 
     index("user_role_idx").on(table.role),
+
+    index("user_department_id_idx").on(table.departmentId),
+
+    index("user_job_title_id_idx").on(table.jobTitleId),
   ],
 );
 
@@ -285,6 +303,7 @@ export const exams = pgTable(
       .notNull(),
 
     totalQuestions: integer("total_questions"),
+    allowedAttempts: integer("allowed_attempts").default(1),
 
     targetPoints: integer("target_points"),
     pointsPerCorrect: integer("points_per_correct"),
@@ -440,26 +459,54 @@ export const questionChoices = pgTable(
 );
 
 /* =========================================================
-   JOB TITLES
+   DEPARTMENTS
 ========================================================= */
 
-export const jobTitles = pgTable("job_titles", {
-  id: uuid("id").defaultRandom().primaryKey(),
-
-  titleName: varchar("title_name", {
-    length: 255,
-  })
-    .notNull()
-    .unique(),
-
-  department: varchar("department"),
-
+export const departments = pgTable("departments", {
+  id: text("id").notNull().unique().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  managerId: text("manager_id"),
+  dgmName: varchar("dgm_name", { length: 255 }),
   createdAt: timestamp("created_at", {
     withTimezone: true,
   })
     .defaultNow()
     .notNull(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
 });
+
+/* =========================================================
+   JOB TITLES
+========================================================= */
+
+export const jobTitles = pgTable(
+  "job_titles",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    titleName: varchar("title_name", {
+      length: 255,
+    })
+      .notNull()
+      .unique(),
+
+    departmentId: text("department_id").references(() => departments.id, {
+      onDelete: "set null",
+    }),
+
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [index("job_title_department_id_idx").on(table.departmentId)],
+);
 /* =========================================================
     Job Title Permissions
 ========================================================= */
@@ -716,6 +763,8 @@ export const attemptQuestions = pgTable(
     */
     shuffledChoices: jsonb("shuffled_choices"),
 
+    // track flagged questions
+    flagged: boolean("flagged").default(false),
     /*
       Track if candidate viewed question
     */
@@ -864,27 +913,12 @@ export const auditLogs = pgTable("audit_logs", {
     .notNull(),
 });
 
-/// Resource permissions
+/* =========================================================
+   PERMISSION POLICIES
+   ========================================================= */
 
-export const resourceTypeEnum = pgEnum("resource_type", [
-  "JOB_TITLE",
-  "DEPARTMENT",
-  "QUESTION",
-  "EXAM",
-]);
-
-export const resourcePermissionEnum = pgEnum("resource_permission", [
-  "VIEW",
-  "CREATE",
-  "UPDATE",
-  "DELETE",
-  "PUBLISH",
-  "ASSIGN",
-  "MANAGE",
-]);
-
-export const resourcePermissions = pgTable(
-  "resource_permissions",
+export const permissionPolicies = pgTable(
+  "permission_policies",
   {
     id: uuid("id").defaultRandom().primaryKey(),
 
@@ -894,25 +928,19 @@ export const resourcePermissions = pgTable(
         onDelete: "cascade",
       }),
 
-    resourceType: resourceTypeEnum("resource_type").notNull(),
+    resource: permissionResourceEnum("resource").notNull(),
 
-    /*
-      ID of the resource.
-      Example:
-      JOB_TITLE      -> job_titles.id
-      DEPARTMENT     -> departments.id
-      QUESTION       -> question_bank.id
-      EXAM           -> exams.id
-    */
-    resourceId: uuid("resource_id").notNull(),
+    actions: permissionActionEnum("actions").array().notNull(),
 
-    permission: resourcePermissionEnum("permission").notNull(),
+    scope: permissionScopeEnum("scope").notNull(),
+
+    scopeId: text("scope_id").notNull(),
 
     grantedBy: text("granted_by").references(() => user.id, {
       onDelete: "set null",
     }),
 
-    grantedAt: timestamp("granted_at", {
+    createdAt: timestamp("created_at", {
       withTimezone: true,
     })
       .defaultNow()
@@ -925,45 +953,25 @@ export const resourcePermissions = pgTable(
     notes: text("notes"),
   },
   (table) => [
-    unique("resource_permission_unique").on(
+    unique("permission_policy_unique").on(
       table.userId,
-      table.resourceType,
-      table.resourceId,
-      table.permission,
+      table.resource,
+      table.scope,
+      table.scopeId,
     ),
 
-    index("resource_permission_user_idx").on(table.userId),
+    index("permission_policy_user_idx").on(table.userId),
 
-    index("resource_permission_resource_idx").on(
-      table.resourceType,
-      table.resourceId,
-    ),
+    index("permission_policy_resource_idx").on(table.resource),
 
-    index("resource_permission_permission_idx").on(table.permission),
+    index("permission_policy_scope_idx").on(table.scope, table.scopeId),
   ],
 );
-
 /* =========================================================
    RELATIONS
 ========================================================= */
 
-export const resourcePermissionRelations = relations(
-  resourcePermissions,
-  ({ one }) => ({
-    user: one(user, {
-      fields: [resourcePermissions.userId],
-      references: [user.id],
-    }),
-
-    grantedByUser: one(user, {
-      fields: [resourcePermissions.grantedBy],
-      references: [user.id],
-      relationName: "permission_granted_by",
-    }),
-  }),
-);
-
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ one, many }) => ({
   sessions: many(session),
 
   accounts: many(account),
@@ -973,6 +981,25 @@ export const userRelations = relations(user, ({ many }) => ({
   createdQuestions: many(questionBank),
 
   attempts: many(examAttempts),
+
+  department: one(departments, {
+    fields: [user.departmentId],
+    references: [departments.id],
+  }),
+
+  jobTitle: one(jobTitles, {
+    fields: [user.jobTitleId],
+    references: [jobTitles.id],
+  }),
+}));
+
+export const departmentRelations = relations(departments, ({ many }) => ({
+  users: many(user),
+  jobTitles: many(jobTitles),
+}));
+
+export const jobTitleRelations = relations(jobTitles, ({ many }) => ({
+  users: many(user),
 }));
 
 export const examRelations = relations(exams, ({ one, many }) => ({

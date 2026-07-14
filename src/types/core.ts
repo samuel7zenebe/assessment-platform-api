@@ -1,3 +1,6 @@
+import type z from "zod";
+import type { userRoleSchema } from "../lib/schema.js";
+
 export type Bindings = {
   token: string;
 };
@@ -9,4 +12,4 @@ export type Variables = {
   };
 };
 
-export type UserRole = "CANDIDATE" | "ADMIN" | "BUILDER";
+export type UserRole = z.infer<typeof userRoleSchema>;

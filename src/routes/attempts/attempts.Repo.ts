@@ -11,6 +11,7 @@ import {
 import { eq, and, inArray, desc, sql } from "drizzle-orm";
 import type z from "zod";
 import { APIError } from "better-auth";
+import { getRandomNumberOrders } from "@/src/lib/helper-funs.js";
 
 /** Round a number to 2 decimal places */
 const clip = (n: number): number => Math.round(n * 100) / 100;
@@ -99,6 +100,8 @@ export const attemptsRepo = {
       }),
     );
 
+    const randomQuestionOrder = getRandomNumberOrders(rawQuestions.length);
+
     const insertData = rawQuestions.map((eqRow, idx) => {
       const question = questions.find((q) => q.id === eqRow.questionId);
       if (!question) throw new Error(`Question not found: ${eqRow.questionId}`);
@@ -107,7 +110,7 @@ export const attemptsRepo = {
       return {
         attemptId: attempt.id,
         questionId: eqRow.questionId,
-        questionOrder: idx, // 0-indexed
+        questionOrder: randomQuestionOrder[idx],
         questionSnapshot: {
           questionId: question.id,
           title: question.title,
@@ -145,12 +148,13 @@ export const attemptsRepo = {
 
   // ── GET ATTEMPT WITH QUESTIONS (no correct answers) ───────────────────────
   getAttemptWithQuestions: async (attemptId: string) => {
-    const [attempt] = await db
+    console.log(attemptId);
+    const attempts = await db
       .select()
       .from(examAttempts)
-      .where(eq(examAttempts.id, attemptId))
-      .limit(1);
-    if (!attempt)
+      .where(eq(examAttempts.id, attemptId));
+    console.log(attempts);
+    if (attempts.length < 1)
       throw new APIError("NOT_FOUND", {
         message: "Attempt not found",
         status: 404,
@@ -182,7 +186,7 @@ export const attemptsRepo = {
     });
 
     return {
-      ...attempt,
+      ...attempts[0],
       questions: filteredQuestions,
     };
   },
@@ -232,6 +236,25 @@ export const attemptsRepo = {
     const [updated] = await db
       .update(attemptQuestionsTable)
       .set({ viewedAt })
+      .where(
+        and(
+          eq(attemptQuestionsTable.attemptId, attemptId),
+          eq(attemptQuestionsTable.questionOrder, order),
+        ),
+      )
+      .returning();
+    if (!updated)
+      throw new APIError("NOT_FOUND", {
+        message: "Question not found",
+        status: 404,
+      });
+    return updated;
+  },
+  // ── TOGGLE FLAG ─────────────────────────────────────────────────────
+  toggleFlag: async (attemptId: string, order: number, flagged: boolean) => {
+    const [updated] = await db
+      .update(attemptQuestionsTable)
+      .set({ flagged })
       .where(
         and(
           eq(attemptQuestionsTable.attemptId, attemptId),
@@ -376,39 +399,14 @@ export const attemptsRepo = {
       let isCorrect: boolean | null = null;
       let awardedPoints: number = 0;
 
-      if (snapshot.type === "CHOICE") {
+      if (snapshot.type === "CHOICE" || snapshot.type === "TRUE_FALSE") {
         if (answer.selectedChoiceId !== null) {
-          // Find the choice in snapshot.choices
+          // Find the selected choice in snapshot.choices
           const choice = snapshot.choices?.find(
             (c: any) => c.id === answer.selectedChoiceId,
           );
           isCorrect = choice?.isCorrect ?? false;
           awardedPoints = isCorrect ? Number(snapshot.points) : 0;
-        }
-      } else if (snapshot.type === "TRUE_FALSE") {
-        if (answer.booleanAnswer !== null) {
-          // The correct boolean answer should be stored in snapshot.questionData or somewhere
-          // For simplicity, we assume it's in snapshot.questionData.correctAnswer
-          const correctBoolean = snapshot.questionData?.correctAnswer;
-          if (typeof correctBoolean === "boolean") {
-            isCorrect = answer.booleanAnswer === correctBoolean;
-            awardedPoints = isCorrect ? Number(snapshot.points) : 0;
-          }
-          // If not found, we could look at choices as fallback
-          else if (snapshot.choices && Array.isArray(snapshot.choices)) {
-            const correctChoice = snapshot.choices.find(
-              (c: any) => c.isCorrect === true,
-            );
-            if (correctChoice) {
-              // Assume the correct choice's choiceText is "true" or "false" (lowercase)
-              const correctBool =
-                correctChoice.choiceText?.toLowerCase() === "true";
-              if (typeof correctBool === "boolean") {
-                isCorrect = answer.booleanAnswer === correctBool;
-                awardedPoints = isCorrect ? Number(snapshot.points) : 0;
-              }
-            }
-          }
         }
       }
       // For other types (MATCH, ESSAY), leave isCorrect and awardedPoints null for manual review

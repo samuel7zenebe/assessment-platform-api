@@ -25,7 +25,3 @@ export const DeleteExamJobTitleSchema = z.object({
   examId: z.uuid(),
   jobTitleId: z.uuid(),
 });
-
-export const GetExamJobTitlesSchema = z.object({
-  examId: z.uuid(),
-});

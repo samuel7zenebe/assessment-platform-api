@@ -9,17 +9,12 @@ import {
   UpdateAssignmentStatusSchema,
 } from "./schema.js";
 import { APIError } from "better-auth";
-import { hasPermission } from "@/src/middleware/auth.js";
 import { userRepo } from "../users/usersRepo.js";
 
 const factory = createFactory();
 
 // ── GET  /exams/:examId/candidates               → list assigned candidates ─
 export const listCandidates = factory.createHandlers(
-  hasPermission({
-    resource: "candidate",
-    action: "list",
-  }),
   sValidator("param", z.object({ examId: z.uuid() })),
   async (c) => {
     const examId = c.req.valid("param").examId;
@@ -38,10 +33,6 @@ export const listCandidates = factory.createHandlers(
 
 // ── POST /exams/:examId/candidates               → assign candidates ─────────
 export const assignCandidates = factory.createHandlers(
-  hasPermission({
-    resource: "candidate",
-    action: "assign_exam",
-  }),
   sValidator("param", z.object({ examId: z.uuid() })),
   sValidator("json", AssignCandidatesSchema),
   async (c) => {
@@ -70,10 +61,6 @@ export const assignCandidates = factory.createHandlers(
 
 // ── PATCH /exam-candidates/:examId/:candidateId/status → update assignment status
 export const updateAssignmentStatus = factory.createHandlers(
-  hasPermission({
-    resource: "candidate",
-    action: "assign_exam",
-  }),
   sValidator(
     "param",
     z.object({
@@ -119,10 +106,6 @@ export const updateAssignmentStatus = factory.createHandlers(
 
 // ── DELETE /exams/:examId/candidates/:candidateId → unassign candidate ───────
 export const unassignCandidate = factory.createHandlers(
-  hasPermission({
-    resource: "candidate",
-    action: "unassign_exam",
-  }),
   sValidator(
     "param",
     z.object({
@@ -162,10 +145,6 @@ export const unassignCandidate = factory.createHandlers(
 );
 
 export const autoAssignCandidates = factory.createHandlers(
-  hasPermission({
-    resource: "candidate",
-    action: "assign_exam",
-  }),
   sValidator("param", z.object({ examId: z.uuid() })),
   sValidator(
     "json",

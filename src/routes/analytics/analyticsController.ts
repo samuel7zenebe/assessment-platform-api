@@ -8,13 +8,15 @@ import {
   ExamAnalyticsQuestionsSchema,
   CandidateAnalyticsSchema,
   PlatformOverviewSchema,
-} from "./schma.js";
+} from "./schema.js";
+import { IdParamSchema } from "@/src/lib/schemas/common.js";
+import { isAdmin } from "@/src/lib/roles.js";
 
 const factory = createFactory();
 
 // ── GET  /api/analytics/exams/:id/summary     # Pass rate, avg score, completion rate
 export const getExamSummary = factory.createHandlers(
-  sValidator("param", z.object({ id: z.uuid() })),
+  sValidator("param", IdParamSchema),
   sValidator("query", ExamAnalyticsSummarySchema),
   async (c) => {
     const { id } = c.req.valid("param");
@@ -22,7 +24,7 @@ export const getExamSummary = factory.createHandlers(
     const role = c.get("user").role;
 
     // Authorization: Only ADMIN can access analytics
-    if (role !== "ADMIN") {
+    if (!isAdmin(role)) {
       throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
     }
 
@@ -42,7 +44,7 @@ export const getExamSummary = factory.createHandlers(
 // Since we don't have full implementations for the other analytics functions yet,
 // we'll return placeholder responses or 501 Not Implemented
 export const getExamQuestionAnalytics = factory.createHandlers(
-  sValidator("param", z.object({ id: z.uuid() })),
+  sValidator("param", IdParamSchema),
   sValidator("query", ExamAnalyticsQuestionsSchema),
   async (c) => {
     const { id } = c.req.valid("param");
@@ -50,7 +52,7 @@ export const getExamQuestionAnalytics = factory.createHandlers(
     const role = c.get("user").role;
 
     // Authorization: Only ADMIN can access analytics
-    if (role !== "ADMIN") {
+    if (!isAdmin(role)) {
       throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
     }
 
@@ -69,7 +71,7 @@ export const getCandidateAnalytics = factory.createHandlers(
 
     // Authorization: ADMIN can access any candidate's analytics
     // CANDIDATE can only access their own analytics
-    if (role !== "ADMIN" && id !== userId) {
+    if (!isAdmin(role) && id !== userId) {
       throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
     }
 
@@ -95,7 +97,7 @@ export const getPlatformOverview = factory.createHandlers(
     const role = c.get("user").role;
 
     // Authorization: Only ADMIN can access platform overview
-    if (role !== "ADMIN") {
+    if (!isAdmin(role)) {
       throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
     }
 

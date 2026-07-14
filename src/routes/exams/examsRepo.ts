@@ -1,5 +1,5 @@
 import { db } from "@/src/db/index.js";
-import { count, eq, inArray, isNull } from "drizzle-orm";
+import { and, count, eq, inArray, isNull } from "drizzle-orm";
 import {
   examJobTitles,
   examQuestions,
@@ -69,6 +69,88 @@ export const examRepo = {
     });
   },
 
+  validateExamQuestionAvailability: async ({
+    jobTitles,
+    totalQuestions,
+    difficultyLevel,
+  }: {
+    jobTitles: Array<{ id: string; weight: number }>;
+    totalQuestions: number;
+    difficultyLevel: number;
+  }) => {
+    const dist = getQuestionDifficultyDistribution({
+      totalQuestions,
+      difficultyLevel,
+    });
+
+    for (const jobTitle of jobTitles) {
+      const easyNeeded = Math.round(dist.easy * (jobTitle.weight / 100));
+      const mediumNeeded = Math.round(dist.medium * (jobTitle.weight / 100));
+      const hardNeeded = Math.round(dist.hard * (jobTitle.weight / 100));
+
+      if (easyNeeded === 0 && mediumNeeded === 0 && hardNeeded === 0) {
+        continue;
+      }
+
+      const [easyCount, mediumCount, hardCount] = await Promise.all([
+        db
+          .select({ count: count() })
+          .from(questionJobTitles)
+          .innerJoin(
+            questionBank,
+            eq(questionJobTitles.questionId, questionBank.id),
+          )
+          .where(
+            and(
+              eq(questionJobTitles.jobTitleId, jobTitle.id),
+              eq(questionBank.difficultyLabel, "EASY"),
+            ),
+          ),
+        db
+          .select({ count: count() })
+          .from(questionJobTitles)
+          .innerJoin(
+            questionBank,
+            eq(questionJobTitles.questionId, questionBank.id),
+          )
+          .where(
+            and(
+              eq(questionJobTitles.jobTitleId, jobTitle.id),
+              eq(questionBank.difficultyLabel, "MEDIUM"),
+            ),
+          ),
+        db
+          .select({ count: count() })
+          .from(questionJobTitles)
+          .innerJoin(
+            questionBank,
+            eq(questionJobTitles.questionId, questionBank.id),
+          )
+          .where(
+            and(
+              eq(questionJobTitles.jobTitleId, jobTitle.id),
+              eq(questionBank.difficultyLabel, "HARD"),
+            ),
+          ),
+      ]);
+
+      const easyAvailable = easyCount[0]?.count || 0;
+      const mediumAvailable = mediumCount[0]?.count || 0;
+      const hardAvailable = hardCount[0]?.count || 0;
+
+      if (
+        easyAvailable < easyNeeded ||
+        mediumAvailable < mediumNeeded ||
+        hardAvailable < hardNeeded
+      ) {
+        throw new APIError("BAD_REQUEST", {
+          message: `Not enough questions available for job title ${jobTitle.id}. Required: EASY=${easyNeeded}, MEDIUM=${mediumNeeded}, HARD=${hardNeeded}. Available: EASY=${easyAvailable}, MEDIUM=${mediumAvailable}, HARD=${hardAvailable}.`,
+          status: 400,
+        });
+      }
+    }
+  },
+
   createRandomExamQuestions: async ({
     difficultyLevel,
     jobTitles,
@@ -80,6 +162,14 @@ export const examRepo = {
       jobTitles,
       totalQuestions,
     });
+
+    if (exam.length === 0) {
+      throw new APIError("BAD_REQUEST", {
+        message:
+          "No questions available for the selected job titles and difficulty. Please add questions or adjust the exam configuration.",
+        status: 400,
+      });
+    }
 
     const exam_questions = await db
       .insert(examQuestions)
@@ -146,6 +236,7 @@ export const examRepo = {
         totalQuestions: exams.totalQuestions,
         description: exams.description,
         targetPoints: exams.targetPoints,
+        allowedAttempts: exams.allowedAttempts,
         status: exams.status,
         generationMode: exams.generationMode,
         estimatedTimeMinutes: exams.estimatedTimeMinutes,
@@ -337,7 +428,7 @@ export const examRepo = {
       },
     };
   },
-  getExamAttempts: async ({
+  getCandidateExamAttempts: async ({
     candidateId,
     examId,
   }: {
@@ -347,6 +438,11 @@ export const examRepo = {
     return examAttemptsRepo.listAttempts({
       examId,
       candidateId,
+    });
+  },
+  getExamAttempts: async ({ examId }: { examId: string }) => {
+    return examAttemptsRepo.listAttempts({
+      examId,
     });
   },
 };

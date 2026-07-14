@@ -10,6 +10,12 @@ export const auth = betterAuth({
     provider: "pg",
     schema: schema,
   }),
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    },
+  },
   trustedOrigins: ["http://localhost:3000"],
   user: {
     additionalFields: {
@@ -30,6 +36,19 @@ export const auth = betterAuth({
         type: "boolean",
         input: true,
         defaultValue: false,
+      },
+      temporaryCandidate: {
+        type: "boolean",
+        input: true,
+        defaultValue: false,
+      },
+      departmentId: {
+        type: "string",
+        input: true,
+      },
+      jobTitleId: {
+        type: "string",
+        input: true,
       },
     },
   },

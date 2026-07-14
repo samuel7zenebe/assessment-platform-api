@@ -73,7 +73,7 @@ export const QuestionBankRepo = {
   ) => {
     const { choices, jobTitles, ...questionBankData } = data;
 
-    // console.log(" JobTitles: ", jobTitles);
+    console.log(" JobTitles: ", jobTitles);
     // console.log("Choices : ", choices);
 
     return db.transaction(async (tx) => {
@@ -114,13 +114,8 @@ export const QuestionBankRepo = {
         id: questionChoices.id,
       });
 
-      const jobTitlesData = await tx
-        .select()
-        .from(JobTitlesSchema)
-        .where(inArray(JobTitlesSchema.titleName, jobTitles));
-
-      const formattedQuestionJobTitles = jobTitlesData.map((jt) => ({
-        jobTitleId: jt.id,
+      const formattedQuestionJobTitles = jobTitles.map((jt) => ({
+        jobTitleId: jt,
         questionId: questionBankDataRow.questionBankId,
       }));
 

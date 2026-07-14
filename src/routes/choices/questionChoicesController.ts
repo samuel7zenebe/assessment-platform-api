@@ -5,17 +5,18 @@ import z from "zod";
 import { HTTPException } from "hono/http-exception";
 import {
   CreateQuestionChoiceSchema,
-  QuestionChoiceSchema,
   QuestionChoiceUpdateSchema,
 } from "./schema.js";
 import { db } from "@/src/db/index.js";
 import { questionBank, questionChoices } from "@/src/db/schema.js";
 import { and, eq, not } from "drizzle-orm";
+import { IdParamSchema } from "@/src/lib/schemas/common.js";
 
 const factory = createFactory({});
 
+// ── GET    /:id/choices  → get question choices by question id ────────────────
 export const getQuestionChoicesByQuestionId = factory.createHandlers(
-  sValidator("param", z.object({ id: z.uuid() })),
+  sValidator("param", IdParamSchema),
   async (c) => {
     const { id } = c.req.valid("param");
     try {
@@ -51,8 +52,10 @@ export const getQuestionChoicesByQuestionId = factory.createHandlers(
     }
   },
 );
+
+// ── GET    /choices/:id  → get question choice by id ───────────────────────────
 export const getQuestionChoiceById = factory.createHandlers(
-  sValidator("param", z.object({ id: z.uuid() })),
+  sValidator("param", IdParamSchema),
   async (c) => {
     const { id } = c.req.valid("param");
     try {
@@ -81,6 +84,7 @@ export const getQuestionChoiceById = factory.createHandlers(
   },
 );
 
+// ── GET    /  → get all question choices ─────────────────────────────────────
 export const getAllQuestionChoices = factory.createHandlers(async (c) => {
   try {
     const choices = await QuestionChoicesRepo.getAllQuestionChoices();
@@ -106,6 +110,8 @@ export const getAllQuestionChoices = factory.createHandlers(async (c) => {
     });
   }
 });
+
+// ── PATCH  /choices/:choiceId  → update question choice ─────────────────────────
 export const updateQuestionChoice = factory.createHandlers(
   sValidator(
     "param",
@@ -165,6 +171,7 @@ export const updateQuestionChoice = factory.createHandlers(
   },
 );
 
+// ── POST   /:id/choices  → create question choice ───────────────────────────────
 export const insertQuestionChoice = factory.createHandlers(
   sValidator(
     "param",
@@ -221,7 +228,7 @@ export const insertQuestionChoice = factory.createHandlers(
   },
 );
 
-// Delete Question Choice
+// ── DELETE /choices/:choiceId  → delete question choice ───────────────────────────
 export const deleteQuestionChoice = factory.createHandlers(
   sValidator("param", z.object({ choiceId: z.uuid() })),
   async (c) => {

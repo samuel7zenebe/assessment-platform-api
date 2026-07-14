@@ -1,8 +1,8 @@
-import z, { optional } from "zod";
+import z from "zod";
 
-export const QuestionChoiceSchema = z.object({
-  id: z.string().min(1, "Question Id is required"),
-  questionId: z.string().min(1, "Question Id is required"),
+export const QuestionChoiceResponseSchema = z.object({
+  id: z.string().min(1),
+  questionId: z.string().min(1),
   choiceText: z.string().min(1, "Choice text is required"),
   isCorrect: z.boolean(),
   displayOrder: z.coerce.number().int().nonnegative(),

@@ -1,5 +1,6 @@
 import { createFactory } from "hono/factory";
 import { jobTitlesRepo } from "./jobTitlesRepo.js";
+import { permissionPoliciesRepo } from "../permission-policies/permissionPoliciesRepo.js";
 import { sValidator } from "@hono/standard-validator";
 import {
   CreateJobTitleSchema,
@@ -13,9 +14,23 @@ import z from "zod";
 
 const factory = createFactory<{}>();
 
+// ── GET    /     → list job titles ───────────────────────────────────────────
 export const getAllJobTitles = factory.createHandlers(async (c) => {
+  const user = c.get("user");
   try {
-    const jobTitlesData = await jobTitlesRepo.findAllJobTitles();
+    let jobTitlesData;
+
+    if (user?.role === "SUPER_ADMIN") {
+      jobTitlesData = await jobTitlesRepo.findAllJobTitles();
+    } else {
+      const { jobTitleIds, departmentIds } =
+        await permissionPoliciesRepo.getAccessibleScopes(user.id);
+
+      jobTitlesData = await jobTitlesRepo.findAccessibleJobTitles({
+        jobTitleIds,
+        departmentIds,
+      });
+    }
 
     return c.json(
       {
@@ -34,12 +49,16 @@ export const getAllJobTitles = factory.createHandlers(async (c) => {
   }
 });
 
+// ── POST   /     → create job title ──────────────────────────────────────────
 export const createJobTitle = factory.createHandlers(
   sValidator("json", CreateJobTitleSchema),
   async (c) => {
-    const { titleName } = c.req.valid("json");
+    const { titleName, departmentId } = c.req.valid("json");
     try {
-      const jobTitlesData = await jobTitlesRepo.createJobTitle(titleName);
+      const jobTitlesData = await jobTitlesRepo.createJobTitle(
+        titleName,
+        departmentId,
+      );
 
       return c.json(
         {
@@ -61,6 +80,7 @@ export const createJobTitle = factory.createHandlers(
   },
 );
 
+// ── POST   /batch  → create job titles in batch ────────────────────────────────
 export const createJobTitlesInBatch = factory.createHandlers(
   sValidator("json", CreateJobTitlesInBatchSchema),
   async (c) => {
@@ -70,6 +90,7 @@ export const createJobTitlesInBatch = factory.createHandlers(
       for (const title of titles) {
         const jobTitleData = await jobTitlesRepo.createJobTitle(
           title.titleName,
+          title.departmentId,
         );
         jobTitlesData.push(jobTitleData[0]);
       }
@@ -94,6 +115,7 @@ export const createJobTitlesInBatch = factory.createHandlers(
   },
 );
 
+// ── GET    /:jobTitleId  → get job title by id ───────────────────────────────
 export const getJobTitleById = factory.createHandlers(
   sValidator("param", JobTitleIdSchema),
   async (c) => {
@@ -118,6 +140,7 @@ export const getJobTitleById = factory.createHandlers(
   },
 );
 
+// ── GET    /title/:titleName  → get job title by title ────────────────────────
 export const getJobTitleByTitle = factory.createHandlers(
   sValidator(
     "param",
@@ -144,6 +167,7 @@ export const getJobTitleByTitle = factory.createHandlers(
   },
 );
 
+// ── PUT    /:id  → update job title ───────────────────────────────────────────
 export const updateJobTitle = factory.createHandlers(
   sValidator(
     "param",
@@ -155,16 +179,17 @@ export const updateJobTitle = factory.createHandlers(
     "json",
     UpdateJobTitleSchema.pick({
       titleName: true,
+      departmentId: true,
     }),
   ),
-
   async (c) => {
-    const { titleName } = c.req.valid("json");
+    const { titleName, departmentId } = c.req.valid("json");
     const { id } = c.req.valid("param");
 
     try {
       const jobTitleData = await jobTitlesRepo.updateJobTitle(id, {
         titleName: titleName,
+        departmentId: departmentId || null,
       });
       return c.json(
         {
@@ -178,12 +203,13 @@ export const updateJobTitle = factory.createHandlers(
     } catch (error) {
       throw new HTTPException(500, {
         cause: "Internal Server Error",
-        message: "An error occurred while fetching the job title",
+        message: "An error occurred while updating the job title",
       });
     }
   },
 );
 
+// ── DELETE /:jobTitleId  → delete job title ─────────────────────────────────
 export const deleteJobTitle = factory.createHandlers(
   sValidator("param", JobTitleIdSchema),
   async (c) => {

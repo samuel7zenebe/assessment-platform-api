@@ -1,0 +1,1 @@
+ALTER TABLE "permission_policies" ALTER COLUMN "scope_id" SET DATA TYPE text;

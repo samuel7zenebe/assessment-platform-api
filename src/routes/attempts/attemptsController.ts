@@ -8,6 +8,7 @@ import {
   AttemptIdParamSchema,
   QuestionOrderParamSchema,
 } from "./schema.js";
+import { strictBooleanSchema } from "@/src/lib/schema.js";
 
 const factory = createFactory();
 
@@ -17,7 +18,6 @@ export const createAttempt = factory.createHandlers(
   async (c) => {
     const { examId } = c.req.valid("json");
     const candidateId = c.get("user").id; // Assuming user is authenticated
-    const role = c.get("user").role;
 
     try {
       const attempt = await attemptsRepo.createAttemptWithSnapshots({
@@ -66,13 +66,19 @@ export const getAttempt = factory.createHandlers(
 
 // ── GET    /api/attempts/:id/questions/:order    # Get single question by order position
 export const getQuestionByOrder = factory.createHandlers(
-  sValidator("param", AttemptIdParamSchema),
-  sValidator("param", QuestionOrderParamSchema),
+  sValidator(
+    "param",
+    z.object({
+      attemptId: z.string(),
+      order: z.coerce.number(),
+    }),
+  ),
   async (c) => {
-    const { attemptId } = c.req.valid("param");
-    const { order } = c.req.valid("param");
+    const { attemptId, order } = c.req.valid("param");
     const userId = c.get("user").id;
     const role = c.get("user").role;
+
+    console.log(attemptId);
 
     try {
       // First get attempt to check authorization and status
@@ -104,11 +110,15 @@ export const getQuestionByOrder = factory.createHandlers(
 
 // ── POST   /api/attempts/:id/questions/:order/view  # Mark viewedAt timestamp
 export const markViewed = factory.createHandlers(
-  sValidator("param", AttemptIdParamSchema),
-  sValidator("param", QuestionOrderParamSchema),
+  sValidator(
+    "param",
+    z.object({
+      attemptId: z.string(),
+      order: z.coerce.number(),
+    }),
+  ),
   async (c) => {
-    const { attemptId } = c.req.valid("param");
-    const { order } = c.req.valid("param");
+    const { attemptId, order } = c.req.valid("param");
     const userId = c.get("user").id;
     const role = c.get("user").role;
 
@@ -134,6 +144,56 @@ export const markViewed = factory.createHandlers(
       if (err instanceof APIError) throw err;
       throw new APIError("INTERNAL_SERVER_ERROR", {
         message: "Failed to mark viewed",
+        cause: err,
+      });
+    }
+  },
+);
+
+// ── POST   /api/attempts/:id/questions/:order/flag  # Mark flag boolean
+export const markFlagged = factory.createHandlers(
+  sValidator(
+    "param",
+    z.object({
+      attemptId: z.string(),
+      order: z.coerce.number(),
+    }),
+  ),
+  sValidator(
+    "json",
+    z.object({
+      flagged: strictBooleanSchema,
+    }),
+  ),
+  async (c) => {
+    const { attemptId, order } = c.req.valid("param");
+    const { flagged } = c.req.valid("json");
+
+    const userId = c.get("user").id;
+    const role = c.get("user").role;
+
+    try {
+      // Check authorization and status
+      const attempt = await attemptsRepo.getAttemptWithQuestions(attemptId);
+      if (role === "CANDIDATE" && attempt.candidateId !== userId) {
+        throw new APIError("FORBIDDEN", {
+          message: "Access denied",
+          status: 403,
+        });
+      }
+      if (attempt.status !== "IN_PROGRESS") {
+        throw new APIError("BAD_REQUEST", {
+          message: `Cannot mark flagged: attempt is ${attempt.status}`,
+          status: 400,
+        });
+      }
+
+      const updated = await attemptsRepo.toggleFlag(attemptId, order, flagged);
+      return c.json({ data: updated, success: true });
+    } catch (err) {
+      if (err instanceof APIError) throw err;
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to mark flagged",
         cause: err,
       });
     }

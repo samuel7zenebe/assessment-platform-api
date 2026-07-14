@@ -1,1 +1,0 @@
-ALTER TABLE "exams" ADD CONSTRAINT "exams_title_unique" UNIQUE("title");

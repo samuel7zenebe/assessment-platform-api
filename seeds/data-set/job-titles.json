@@ -1,0 +1,1306 @@
+[
+  {
+    "titleName": "Materials Management Engineer II",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Lowbade Operator",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Senior Store Keeper",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Senior Fuel truck driver",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Store Keeper III",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Senior Issuing and Receiving Clerk",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Coal Weight Bridge Clerk III",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Store Keeper II",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Store Keeper I",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Coal Weight Bridge Clerk II",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Store Keeper",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Equipment and Spare Parts Purchasing Officer II (Local)",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Equipment and Spare Parts Purchasing Officer I (Local)",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Equipment And Spare Parts Purchasing Officer (Local)",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Equipment and Spare Parts Purchasing Officer II (Foreign)",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Equipment and Spare Parts Purchasing Officer III (Foreign)",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Logistics Officer I",
+    "departmentId": "DEPT001"
+  },
+  {
+    "titleName": "Partner Relationship And Performance Manager",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Chief Cement Dispatch Controller",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Outbound Logistics Officer",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Outbound Logistic Officeer",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Customer Inquiries And Support Officer",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Cement dispach controller",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Cement Dispatch WB Clerk I",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Cement Dipach WB clerk",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Cement Dispatch Clerk I",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Customer Relations Manager",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Branding And Communication Officer",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Credit Analyst",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Collection Officer",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Collector",
+    "departmentId": "DEPT002"
+  },
+  {
+    "titleName": "Cement Production Quality Controller",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Cement Production Quality Controller I",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Senior Chemist II",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Chemist II",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Chemist",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Lab Technician III",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Sampler",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Data Encoder I",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Production Optimization Engineer",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Quality Management COE I",
+    "departmentId": "DEPT003"
+  },
+  {
+    "titleName": "Business Improvement And Knowledge Management Officer",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Business Improvement Consultant, Production and Support Operations",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Business Improvement Consultant, Supply Chain And Asset Management",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Program Management Officer",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Project Management Officer",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Mechanical Engineering Project Consultant",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Construction Project Consultant",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Surveyor II",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "Electrical Engineering Project Consultant",
+    "departmentId": "DEPT004"
+  },
+  {
+    "titleName": "PP Bag Shift Engineer I",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "PP Bag Production Line Supervisor",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Senior Tape Line Operator",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Senior Convertex Operator",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Data Analyst II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Loom Operator III",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Convertex Operator",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Printing Operator III",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Convertex Operator III",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "laminex Operator III",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Tape Line Operator III",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "cutex/silitex Operator III",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Recycle Operator III",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Recycle Operator II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Loom Operator II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Convertex Operator II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "laminex Operator II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Tape Line Operator II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Printing Operator II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Trainee PP bags Operator",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "PP Bags Production Operator",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Convertex Operator I",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "PP bag Operator",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Tape line Operator I",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Printing Operator I",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "laminex Operator I",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "PP Bag Shift Quality Controller",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Quality Attendant",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "PP Bag Quality Attendant II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Plant Asset Management superintendent(PP Bag Plant)",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Plant Asset Management Shift Supervisor II",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Plant Asset Management and Maintenance Shift Supervisor",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Senior Electrical Technician",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Utility Operator",
+    "departmentId": "DEPT005"
+  },
+  {
+    "titleName": "Senior Loader Operator I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Plant Senior Loader Operator I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Senior Mechanic Attendant I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Mechanic Attendant III",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Cement Loading Coordinator II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Campus Administration Coordinator",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Bulk And Big Bag Loading Cement Coordinator II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Plant Loader Operator I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Cement Loading Coordinator",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Mechanic Attendant II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Bag Feeder II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Cement Loader I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Cement Loader",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Mechanic Attendant I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Bag Feeder I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Mechanic Attendant",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Bag Feeder",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Cement Loading",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Cement Dispatch Clerk",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Packer Cleaner",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Rotary Feeder I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Diverter I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Bag Store Keeper I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Senior Civil Engineer",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Civil Engineer II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Mining Supervisor",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Crusher Supervisor",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Senior Mechanic Attendant II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Data Clerk III",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Data Collector II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Data Collector",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Crane Operator",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Senior Water Truck Driver",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Off Highway Dumper Operator I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Tractor Operator II",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Tractor Forklift Operator I",
+    "departmentId": "DEPT006"
+  },
+  {
+    "titleName": "Chief Plant Asset Management and Maintenance Electrical and Automation Supervisor",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Plant Asset Management and Maintenance Electrical And Automation Supervisor (Cement Mill Area)",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Electrical and Automation Engineer",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical And Automation Engineer II",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Electrical And Automation Technician",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical and Automation Technician IV",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical and Automation Technician III",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical and Automation Technician II",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Daily Electrical Machine Cleaner",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Plant Asset Management and Maintenance Mechanical Supervisor",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanical Engineering COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Chief Fabrication Technician",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Fabrication Technician",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanical Technician COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Mechanical Technician II",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanical Engineer I",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Fabrication Technician III",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanical Engineer",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Daily Welder",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Electrical and Automation Engineer COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Plant Asset Management And Maintenance Electrical and Automation Supervisor",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical Engineer",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical and Automation Engineer I",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Mechanical Maintenance Expert",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Asset Maintenance and Policy Resourcing Engineer",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Asset Condition Inspector (Mechanical)",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Asset Condition Inspector II (Mechanical)",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Asset Management Information System Analyst I",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Asset Condition Inspector II (Electrical and Instrumental)",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanical Spare Part Engineer",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Asset Condition Inspector I (Electrical and Instrumental)",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Asset Condition Inspector I (Mechanical)",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical Spare Parts Engineer",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Documentation Officer II",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Tool Keeper I",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "PM Engineer",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Chief Plant Asset Management and Maintenance Electrical Automation Supervisor",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical and Automation Engineering COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Electrical and Automation Engineer I COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Electrical and Automation Technician COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Chief Electrical and Automation Technician COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Daily Electrical Equipment Cleaner",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Plant Asset Management and Maintenance Mechanical Supervisor",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanical Engineer III",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Mechanical Technician COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Fabrication Technician IV",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanic",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Customer Relation Manager",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Logistic Officer",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Collector And Petty Cashier",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Small Vehicle Driver",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Small Vehicle Driver I",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Manager Purchasing",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Manager Support Service",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Finance Officer",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "HR, Site Officer",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Purchasing Officer",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Guard",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "Cleaner",
+    "departmentId": "DEPT008"
+  },
+  {
+    "titleName": "HR Customer Services Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Talent Management Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Performance Compensation and Benefit Administration Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Employee Data Management Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Assistant Employee Data Management Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Time Keeper I",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Assistant Performance Compensation and Benefit Administration Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Talent Management Analyst",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "HR Analyst",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Learning and Development Analyst",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Learning Administration Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "HR Analytics Officer",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Reward Analyst",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Performance Management Analyst",
+    "departmentId": "DEPT009"
+  },
+  {
+    "titleName": "Electrical and Automation Supervisor I",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Chief Electro Mechanical Technician",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Machinshop Supervisor I",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Senior Automation Lab Technician",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Mechanical Design and Indigenization Engineer II",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Senior Electro Mechanical Technician",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Mechanical Design and Indigenization Engineer I",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Electrical Motor Winding Technician IV",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Machinist IV",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Automation Lab Technician IV",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Electro Mechanical Technician IV",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Draftsman IV",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Electrical Motor Winding Engineer I",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Machinist III",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Electrical Motor Winding Technician III",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Electrical Motor Winding Technician II",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Wood Work Technician II",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Machinist",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Draftsman",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Trainee Machinist",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Tool Keeper",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Utility Operation Supervisor",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Utility Maintenance Supervisor I",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Chief Plumber",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Grid Station Operator III",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Utility Operator III",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Electrical Technician III",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Grid Station Operator II",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Utility Operator II",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Plumber I",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Utility Attendant II",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Utility Attendant",
+    "departmentId": "DEPT010"
+  },
+  {
+    "titleName": "Manager, Transport and Admin Service",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Auto Electrical PM Engineer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Administrative Service Supervisor",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Bus Driver II",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Auto Mechanic PM Engineer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Insurance Officer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Auto Electrician IV",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Archive Head",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Water Truck Driver",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Bus Driver",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Secretary II",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Secretary",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Body Man II",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Mid-bus Driver",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Secretary I",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Car Washer and Grease Man II",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Auto Mechanic I",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Tractor Operator I",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Archive Clerk",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Auto Mechanic",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Data Analyst",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Small Vehicle Transport Clerk",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Messenger",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Librarian",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Assistant Bus Driver",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Employee Health Policies, Compliance and Awareness Officer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Health Officer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Nurse II",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Pharmacy Technician",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Nurse I",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Midwife",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Data Clerk Clinic",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Facilities Superintendent",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Guard Supervisor",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Gardener",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Guard Shift Supervisor",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Compound Beautification and Maintenance Officer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "General Support Officer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Gate Pass Clerk",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Cement Count Clerk",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Guard I",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Safety and Security Monitoring and Compliance Officer",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Safety Coordinator (Roads)",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Emergency Response Supervisor",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Safety Coordinator (Plant and Campus)",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Fire Fighting Truck Driver",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Fire Fighting Truck Driver II",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Fire Fighting Truck Driver I",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Fire Fighter II",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "Fire Fighter I",
+    "departmentId": "DEPT011"
+  },
+  {
+    "titleName": "General Manager",
+    "departmentId": "DEPT012"
+  },
+  {
+    "titleName": "Executive Secretary",
+    "departmentId": "DEPT012"
+  },
+  {
+    "titleName": "Third Line Project Officer",
+    "departmentId": "DEPT013"
+  },
+  {
+    "titleName": "Electrical And Automation Engineer",
+    "departmentId": "DEPT014"
+  },
+  {
+    "titleName": "Supervisor (Energy Field)",
+    "departmentId": "DEPT014"
+  },
+  {
+    "titleName": "Business Application Development And Administration Section Head",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Senior System Administrator",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Management Information System and ERP Analyst",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Senior System Support Expert",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "System Administrator",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Trainee Software Engineer And Programmer",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "ICT Operation And Maintenance Section Head",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Hardware Technician",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Trainee Hardware Technician",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Trainee Network And Maintenance Technician",
+    "departmentId": "DEPT015"
+  },
+  {
+    "titleName": "Senior Accounting Policies and System Analyst",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Senior Fixed Asset and Inventory Controller",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Senior Accountant I",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Accountant II",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Support Services Supervisor",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Revenue And Collection Accountant",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Financial Recording And Reporting Accountant",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Accountant I",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Accountant",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Senior Management Reporting And Decision Support Analyst",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Senior Cost and Management Accountant",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Chief Payable and Settlement Accountant",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Senior Revenue And Collections Analyst",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Cashier",
+    "departmentId": "DEPT016"
+  },
+  {
+    "titleName": "Legal Service Manager",
+    "departmentId": "DEPT017"
+  },
+  {
+    "titleName": "Data Analyst and Documentation Specialist",
+    "departmentId": "DEPT019"
+  },
+  {
+    "titleName": "Community And Government Relation Officer",
+    "departmentId": "DEPT019"
+  },
+  {
+    "titleName": "Customer Management Strategy Officer",
+    "departmentId": "DEPT020"
+  },
+  {
+    "titleName": "Performance And Decision Support Officer",
+    "departmentId": "DEPT020"
+  },
+  {
+    "titleName": "Business Development Officer",
+    "departmentId": "DEPT020"
+  },
+  {
+    "titleName": "Business Strategy And Planning Officer",
+    "departmentId": "DEPT020"
+  },
+  {
+    "titleName": "Business Intelligence Officer",
+    "departmentId": "DEPT020"
+  },
+  {
+    "titleName": "Researcher, New Product Development",
+    "departmentId": "DEPT021"
+  },
+  {
+    "titleName": "Energy Optimization Engineer",
+    "departmentId": "DEPT021"
+  },
+  {
+    "titleName": "Cement Solution Consultant And Chemist",
+    "departmentId": "DEPT021"
+  },
+  {
+    "titleName": "Geologist",
+    "departmentId": "DEPT021"
+  },
+  {
+    "titleName": "Manager, CRM Mechanical Maintenance",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Chief Plant Asset Management and Maintenance Mechanical Supervisor",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Chief Mechanical Technician COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Junior Plant Asset Management Shift Supervisor I",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Mechanical Engineer COE",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Senior Process Mechanic II",
+    "departmentId": "DEPT007"
+  },
+  {
+    "titleName": "Deputy Genral Manager",
+    "departmentId": "DEPT012"
+  },
+  {
+    "titleName": "Genral Manager",
+    "departmentId": "DEPT012"
+  },
+  {
+    "titleName": "Department Mnanager",
+    "departmentId": "DEPT012"
+  },
+  {
+    "titleName": "Division Manager",
+    "departmentId": "DEPT012"
+  }
+]

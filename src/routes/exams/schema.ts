@@ -12,6 +12,7 @@ export const ExamSchema = z.object({
   scheduledTime: z.string().nullable(),
   lateEntryGraceMinutes: z.number().default(15),
   passPercentage: z.number(),
+  allowedAttempts: z.number().default(1),
   totalQuestions: z.number(),
   difficultyLevel: z.number(),
   status: z.enum(examStatusEnum.enumValues),
@@ -33,11 +34,13 @@ export const CreateExamSchema = ExamSchema.omit({
   updatedAt: true,
 })
   .extend({
-    jobTitles: z.array(
-      JobTitleCreateExamSchema.extend({
-        isPrimary: z.boolean().optional(),
-      }),
-    ),
+    jobTitles: z
+      .array(
+        JobTitleCreateExamSchema.extend({
+          isPrimary: z.boolean().optional(),
+        }),
+      )
+      .min(1, "At least one job title is required"),
   })
   .omit({
     createdBy: true,
@@ -65,12 +68,14 @@ export const GenerateExamQuestionsSchema = ExamSchema.pick({
   totalQuestions: true,
   difficultyLevel: true,
 }).extend({
-  jobTitles: z.array(
-    z.object({
-      id: z.string(),
-      weight: z.number().min(0).max(100),
-    }),
-  ),
+  jobTitles: z
+    .array(
+      z.object({
+        id: z.string(),
+        weight: z.number().min(0).max(100),
+      }),
+    )
+    .min(1, "At least one job title is required"),
 });
 
 export const ExamStatisticsSchema = z.object({});

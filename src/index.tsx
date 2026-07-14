@@ -8,6 +8,12 @@ import { websocket, upgradeWebSocket } from "hono/bun";
 import { AppRouter } from "./router.js";
 import { htmlString } from "./html-string.js";
 import { APIError } from "better-auth";
+import { usernameGenerator, userRepo } from "./routes/users/usersRepo.js";
+import { faker } from "@faker-js/faker";
+import { db } from "./db/index.js";
+import { user as UserSchema } from "./db/schema.js";
+import { eq } from "drizzle-orm";
+import type { CandidateRow } from "@/dist/src/middlewares/candidate-parser.js";
 
 declare module "hono" {
   interface ContextVariableMap {
@@ -15,6 +21,7 @@ declare module "hono" {
       id: string;
       role: UserRole;
     };
+    candidates: CandidateRow[];
   }
 }
 
@@ -59,13 +66,59 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.use("*", logger());
 
-app.get("/health", async (c) => {
+app.get("/system/health", async (c) => {
   return c.json({
     currentUser: {
       ...c.get("user"),
     },
     systemHealth: "Perfect",
   });
+});
+
+app.get("/system/seed-all", async (c) => {
+  try {
+    for (let i = 0; i < 100; i++) {
+      const sex = faker.person.sexType();
+      const firstName = faker.person.firstName(sex);
+      const lastName = faker.person.lastName(sex);
+      const email = faker.internet.email({ firstName, lastName });
+
+      const name = faker.person.fullName({
+        firstName,
+        lastName,
+      });
+
+      const username =
+        usernameGenerator() +
+        faker.internet.username({
+          firstName,
+          lastName,
+        });
+      console.log("username", username);
+      const password = faker.internet.password();
+      console.log("Password", password);
+      const image = faker.image.avatar();
+      const user = await auth.api.createUser({
+        // headers: c.req.raw.headers,
+        body: {
+          email,
+          name,
+          password,
+          data: {
+            image,
+            temporaryCandidate: true,
+            username,
+          },
+        },
+      });
+    }
+  } catch (err) {
+    console.log("Error Seeding: ");
+    console.log(err);
+    throw new APIError("EXPECTATION_FAILED", {
+      message: "Seeding  failed",
+    });
+  }
 });
 
 app.onError((err, c) => {

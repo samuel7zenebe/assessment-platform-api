@@ -3,7 +3,8 @@ import { auditLogsRepo } from "./auditLogs.Repo.js";
 import { sValidator } from "@hono/standard-validator";
 import { z } from "zod";
 import { APIError } from "better-auth";
-import { AuditLogsQuerySchema } from "./schma.js";
+import { AuditLogsQuerySchema } from "./schema.js";
+import { isAdmin } from "@/src/lib/roles.js";
 
 const factory = createFactory();
 
@@ -24,7 +25,7 @@ export const getAuditLogs = factory.createHandlers(
     const role = c.get("user").role;
 
     // Authorization: Only ADMIN can access audit logs
-    if (role !== "ADMIN") {
+    if (!isAdmin(role)) {
       throw new APIError("FORBIDDEN", { message: "Access denied", status: 403 });
     }
 

@@ -77,4 +77,5 @@ export const examsRouter = new Hono()
   .patch("/:examId/:candidateId/status", ...updateAssignmentStatus)
   // DELETE /exams/:examId/candidates/:candidateId → unassign candidate
   .delete("/:examId/candidates/:candidateId", ...unassignCandidate)
-  .get("/:id/attempts", ...getExamAttempts);
+  .get("/:id/attempts", ...getExamAttempts)
+  .get("/:id/candidate/attempts", ...getExamAttempts);

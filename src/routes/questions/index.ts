@@ -20,12 +20,22 @@ import {
   getQuestionJobTitles,
   createQuestionJobTitle,
 } from "../question-jobtitles/questionJobTitlesController.js";
+import { hasScopedPermissions } from "@/src/middleware/auth.js";
 
 export const questionBankRouter = new Hono()
   .get("/", ...getQuestions)
   .get("/categories", ...getAllCategories)
   .get("/:id", ...getQuestionById)
-  .post("/", ...createQuestion)
+  .post(
+    "/",
+    hasScopedPermissions({
+      resource: "QUESTION",
+      permission: "CREATE",
+      scope: "JOB_TITLE",
+      field: "jobTitles",
+    }),
+    ...createQuestion,
+  )
   .post("/batch", ...createQuestionInBatch)
   .post("/batch/upload", ...createQuestionInBatchExcel) // Upload and parse Excel file
   // .post("/:id/duplicate", )   /// Not implemented yet

@@ -1,5 +1,5 @@
 {
-  "id": "3a5e0861-6a69-471d-a9bc-06498d7810ff",
+  "id": "59995bff-ca0a-48df-af05-c55491982caa",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -138,21 +138,33 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "attempt_id": {
-          "name": "attempt_id",
+        "attempt_question_id": {
+          "name": "attempt_question_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "question_id": {
-          "name": "question_id",
+        "selected_choice_id": {
+          "name": "selected_choice_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "answer_text": {
           "name": "answer_text",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "boolean_answer": {
+          "name": "boolean_answer",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "answer_json": {
+          "name": "answer_json",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -168,19 +180,207 @@
           "primaryKey": false,
           "notNull": false
         },
+        "manually_reviewed": {
+          "name": "manually_reviewed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "reviewed_by": {
+          "name": "reviewed_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_at": {
+          "name": "reviewed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewer_feedback": {
+          "name": "reviewer_feedback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "answered_at": {
           "name": "answered_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "answers_attempt_question_idx": {
+          "name": "answers_attempt_question_idx",
+          "columns": [
+            {
+              "expression": "attempt_question_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "answers_reviewed_by_idx": {
+          "name": "answers_reviewed_by_idx",
+          "columns": [
+            {
+              "expression": "reviewed_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "answers_attempt_id_exam_attempts_id_fk": {
-          "name": "answers_attempt_id_exam_attempts_id_fk",
+        "answers_attempt_question_id_attempt_questions_id_fk": {
+          "name": "answers_attempt_question_id_attempt_questions_id_fk",
           "tableFrom": "answers",
+          "tableTo": "attempt_questions",
+          "columnsFrom": [
+            "attempt_question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "answers_selected_choice_id_question_choices_id_fk": {
+          "name": "answers_selected_choice_id_question_choices_id_fk",
+          "tableFrom": "answers",
+          "tableTo": "question_choices",
+          "columnsFrom": [
+            "selected_choice_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "answers_reviewed_by_user_id_fk": {
+          "name": "answers_reviewed_by_user_id_fk",
+          "tableFrom": "answers",
+          "tableTo": "user",
+          "columnsFrom": [
+            "reviewed_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.attempt_questions": {
+      "name": "attempt_questions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "attempt_id": {
+          "name": "attempt_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_order": {
+          "name": "question_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_snapshot": {
+          "name": "question_snapshot",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shuffled_choices": {
+          "name": "shuffled_choices",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "viewed_at": {
+          "name": "viewed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "answered_at": {
+          "name": "answered_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "attempt_question_attempt_idx": {
+          "name": "attempt_question_attempt_idx",
+          "columns": [
+            {
+              "expression": "attempt_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "attempt_questions_attempt_id_exam_attempts_id_fk": {
+          "name": "attempt_questions_attempt_id_exam_attempts_id_fk",
+          "tableFrom": "attempt_questions",
           "tableTo": "exam_attempts",
           "columnsFrom": [
             "attempt_id"
@@ -191,9 +391,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "answers_question_id_question_bank_id_fk": {
-          "name": "answers_question_id_question_bank_id_fk",
-          "tableFrom": "answers",
+        "attempt_questions_question_id_question_bank_id_fk": {
+          "name": "attempt_questions_question_id_question_bank_id_fk",
+          "tableFrom": "attempt_questions",
           "tableTo": "question_bank",
           "columnsFrom": [
             "question_id"
@@ -201,12 +401,21 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "unique_attempt_question": {
+          "name": "unique_attempt_question",
+          "nullsNotDistinct": false,
+          "columns": [
+            "attempt_id",
+            "question_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -278,6 +487,78 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.departments": {
+      "name": "departments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "manager_id": {
+          "name": "manager_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dgm_name": {
+          "name": "dgm_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "departments_id_unique": {
+          "name": "departments_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        },
+        "departments_name_unique": {
+          "name": "departments_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -482,6 +763,132 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.exam_job_titles": {
+      "name": "exam_job_titles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "exam_id": {
+          "name": "exam_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_title_id": {
+          "name": "job_title_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weight_percentage": {
+          "name": "weight_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 100
+        },
+        "is_primary": {
+          "name": "is_primary",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "question_count": {
+          "name": "question_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "exam_job_title_exam_idx": {
+          "name": "exam_job_title_exam_idx",
+          "columns": [
+            {
+              "expression": "exam_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "exam_job_title_job_idx": {
+          "name": "exam_job_title_job_idx",
+          "columns": [
+            {
+              "expression": "job_title_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "exam_job_titles_exam_id_exams_id_fk": {
+          "name": "exam_job_titles_exam_id_exams_id_fk",
+          "tableFrom": "exam_job_titles",
+          "tableTo": "exams",
+          "columnsFrom": [
+            "exam_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "exam_job_titles_job_title_id_job_titles_id_fk": {
+          "name": "exam_job_titles_job_title_id_job_titles_id_fk",
+          "tableFrom": "exam_job_titles",
+          "tableTo": "job_titles",
+          "columnsFrom": [
+            "job_title_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "unique_exam_job_title": {
+          "name": "unique_exam_job_title",
+          "nullsNotDistinct": false,
+          "columns": [
+            "exam_id",
+            "job_title_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.exam_questions": {
       "name": "exam_questions",
       "schema": "",
@@ -565,6 +972,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "category": {
+          "name": "category",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "description": {
           "name": "description",
           "type": "text",
@@ -577,6 +990,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "late_entry_grace_minutes": {
+          "name": "late_entry_grace_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 15
+        },
         "scheduled_time": {
           "name": "scheduled_time",
           "type": "timestamp with time zone",
@@ -587,13 +1007,34 @@
           "name": "pass_percentage",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 50
+        },
+        "generation_mode": {
+          "name": "generation_mode",
+          "type": "exam_generation_mode",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'QUESTION_COUNT'"
         },
         "total_questions": {
           "name": "total_questions",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "target_points": {
+          "name": "target_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "points_per_correct": {
+          "name": "points_per_correct",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         },
         "difficulty_level": {
           "name": "difficulty_level",
@@ -609,15 +1050,15 @@
           "notNull": true,
           "default": "'DRAFT'"
         },
-        "job_title_ids": {
-          "name": "job_title_ids",
-          "type": "uuid[]",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_by": {
           "name": "created_by",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "exam_metadata": {
+          "name": "exam_metadata",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -675,6 +1116,98 @@
         }
       },
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "exams_title_unique": {
+          "name": "exams_title_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "title"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.job_title_permissions": {
+      "name": "job_title_permissions",
+      "schema": "",
+      "columns": {
+        "job_title_id": {
+          "name": "job_title_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "create_question": {
+          "name": "create_question",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "update_question": {
+          "name": "update_question",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "delete_question": {
+          "name": "delete_question",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "edit_question": {
+          "name": "edit_question",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "job_title_permissions_job_title_id_job_titles_id_fk": {
+          "name": "job_title_permissions_job_title_id_job_titles_id_fk",
+          "tableFrom": "job_title_permissions",
+          "tableTo": "job_titles",
+          "columnsFrom": [
+            "job_title_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "job_title_permissions_user_id_user_id_fk": {
+          "name": "job_title_permissions_user_id_user_id_fk",
+          "tableFrom": "job_title_permissions",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "job_title_permissions_user_id_job_title_id_pk": {
+          "name": "job_title_permissions_user_id_job_title_id_pk",
+          "columns": [
+            "user_id",
+            "job_title_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -697,6 +1230,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "department_id": {
+          "name": "department_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -705,8 +1244,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "job_title_department_id_idx": {
+          "name": "job_title_department_id_idx",
+          "columns": [
+            {
+              "expression": "department_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "job_titles_department_id_departments_id_fk": {
+          "name": "job_titles_department_id_departments_id_fk",
+          "tableFrom": "job_titles",
+          "tableTo": "departments",
+          "columnsFrom": [
+            "department_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "job_titles_title_name_unique": {
@@ -714,6 +1283,174 @@
           "nullsNotDistinct": false,
           "columns": [
             "title_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.permission_policies": {
+      "name": "permission_policies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resource": {
+          "name": "resource",
+          "type": "permission_resource",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actions": {
+          "name": "actions",
+          "type": "permission_action[]",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scope": {
+          "name": "scope",
+          "type": "permission_scope",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scope_id": {
+          "name": "scope_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "granted_by": {
+          "name": "granted_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "permission_policy_user_idx": {
+          "name": "permission_policy_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "permission_policy_resource_idx": {
+          "name": "permission_policy_resource_idx",
+          "columns": [
+            {
+              "expression": "resource",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "permission_policy_scope_idx": {
+          "name": "permission_policy_scope_idx",
+          "columns": [
+            {
+              "expression": "scope",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "scope_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "permission_policies_user_id_user_id_fk": {
+          "name": "permission_policies_user_id_user_id_fk",
+          "tableFrom": "permission_policies",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "permission_policies_granted_by_user_id_fk": {
+          "name": "permission_policies_granted_by_user_id_fk",
+          "tableFrom": "permission_policies",
+          "tableTo": "user",
+          "columnsFrom": [
+            "granted_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "permission_policy_unique": {
+          "name": "permission_policy_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id",
+            "resource",
+            "scope",
+            "scope_id"
           ]
         }
       },
@@ -731,6 +1468,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
         },
         "category": {
           "name": "category",
@@ -752,18 +1495,38 @@
           "primaryKey": false,
           "notNull": true
         },
-        "difficulty_level": {
-          "name": "difficulty_level",
+        "difficulty_label": {
+          "name": "difficulty_label",
           "type": "difficulty_level",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'MEDIUM'"
         },
         "image_url": {
           "name": "image_url",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "audio_url": {
+          "name": "audio_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "video_url": {
+          "name": "video_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estimated_time_seconds": {
+          "name": "estimated_time_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 60
         },
         "points": {
           "name": "points",
@@ -772,11 +1535,44 @@
           "notNull": true,
           "default": 1
         },
+        "explanation": {
+          "name": "explanation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "question_data": {
+          "name": "question_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "is_public": {
+          "name": "is_public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "created_by": {
           "name": "created_by",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
         },
         "created_at": {
           "name": "created_at",
@@ -800,11 +1596,56 @@
         }
       },
       "indexes": {
+        "question_type_idx": {
+          "name": "question_type_idx",
+          "columns": [
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "question_difficulty_idx": {
+          "name": "question_difficulty_idx",
+          "columns": [
+            {
+              "expression": "difficulty_label",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "question_created_by_idx": {
           "name": "question_created_by_idx",
           "columns": [
             {
               "expression": "created_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "question_active_idx": {
+          "name": "question_active_idx",
+          "columns": [
+            {
+              "expression": "is_active",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -860,6 +1701,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "choice_key": {
+          "name": "choice_key",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "is_correct": {
           "name": "is_correct",
           "type": "boolean",
@@ -867,12 +1714,32 @@
           "notNull": true,
           "default": false
         },
+        "explanation": {
+          "name": "explanation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "display_order": {
           "name": "display_order",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
@@ -1148,6 +2015,13 @@
           "notNull": true,
           "default": true
         },
+        "temporary_candidate": {
+          "name": "temporary_candidate",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "banned": {
           "name": "banned",
           "type": "boolean",
@@ -1163,6 +2037,30 @@
         "ban_expires": {
           "name": "ban_expires",
           "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "display_username": {
+          "name": "display_username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "department_id": {
+          "name": "department_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "job_title_id": {
+          "name": "job_title_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -1202,11 +2100,75 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "user_department_id_idx": {
+          "name": "user_department_id_idx",
+          "columns": [
+            {
+              "expression": "department_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_job_title_id_idx": {
+          "name": "user_job_title_id_idx",
+          "columns": [
+            {
+              "expression": "job_title_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "user_department_id_departments_id_fk": {
+          "name": "user_department_id_departments_id_fk",
+          "tableFrom": "user",
+          "tableTo": "departments",
+          "columnsFrom": [
+            "department_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "user_job_title_id_job_titles_id_fk": {
+          "name": "user_job_title_id_job_titles_id_fk",
+          "tableFrom": "user",
+          "tableTo": "job_titles",
+          "columnsFrom": [
+            "job_title_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "user_username_unique": {
+          "name": "user_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        },
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
@@ -1317,6 +2279,15 @@
         "HARD"
       ]
     },
+    "public.exam_generation_mode": {
+      "name": "exam_generation_mode",
+      "schema": "public",
+      "values": [
+        "QUESTION_COUNT",
+        "POINT_TARGET",
+        "HYBRID"
+      ]
+    },
     "public.exam_status": {
       "name": "exam_status",
       "schema": "public",
@@ -1326,6 +2297,36 @@
         "ACTIVE",
         "CLOSED",
         "ARCHIVED"
+      ]
+    },
+    "public.permission_action": {
+      "name": "permission_action",
+      "schema": "public",
+      "values": [
+        "VIEW",
+        "CREATE",
+        "UPDATE",
+        "DELETE",
+        "PUBLISH",
+        "ASSIGN"
+      ]
+    },
+    "public.permission_resource": {
+      "name": "permission_resource",
+      "schema": "public",
+      "values": [
+        "QUESTION",
+        "EXAM",
+        "CANDIDATE"
+      ]
+    },
+    "public.permission_scope": {
+      "name": "permission_scope",
+      "schema": "public",
+      "values": [
+        "JOB_TITLE",
+        "DEPARTMENT",
+        "FACTORY"
       ]
     },
     "public.question_type": {
@@ -1344,7 +2345,8 @@
       "values": [
         "CANDIDATE",
         "ADMIN",
-        "BUILDER"
+        "BUILDER",
+        "SUPER_ADMIN"
       ]
     }
   },

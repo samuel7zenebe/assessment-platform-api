@@ -4,10 +4,10 @@ import { QuestionJobTitleSchema } from "./schema.js";
 import { HTTPException } from "hono/http-exception";
 import { QuestionJobTitlesRepo } from "./questionJobTitlesRepo.js";
 import z from "zod";
-import { title } from "process";
 
 const factory = createFactory<{}>();
 
+// ── GET  /question-jobtitles  → list question-jobtitles ──────────────────────────
 export const getQuestionsJobTitles = factory.createHandlers(
   sValidator(
     "query",
@@ -37,6 +37,7 @@ export const getQuestionsJobTitles = factory.createHandlers(
   },
 );
 
+// ── POST  /question-jobtitles/available  → check available questions ──────────────
 export const availableQuestions = factory.createHandlers(
   sValidator(
     "json",
@@ -98,6 +99,7 @@ export const availableQuestions = factory.createHandlers(
   },
 );
 
+// ── GET  /:id/job-titles  → get question job titles ──────────────────────────────
 export const getQuestionJobTitles = factory.createHandlers(
   sValidator(
     "param",
@@ -125,6 +127,7 @@ export const getQuestionJobTitles = factory.createHandlers(
   },
 );
 
+// ── POST  /:questionId/job-titles/:jobTitleId  → create question job title ──────
 export const createQuestionJobTitle = factory.createHandlers(
   sValidator("json", QuestionJobTitleSchema.array()),
   async (c) => {
@@ -146,6 +149,7 @@ export const createQuestionJobTitle = factory.createHandlers(
   },
 );
 
+// ── DELETE  /:questionId/job-titles/:jobTitleId  → delete question job title ─────
 export const deleteQuestionJobTitle = factory.createHandlers(
   sValidator(
     "param",

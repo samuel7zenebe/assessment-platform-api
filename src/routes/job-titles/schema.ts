@@ -6,6 +6,7 @@ export const JobTitleSchema = z.object({
 });
 export const CreateJobTitleSchema = z.object({
   titleName: z.string().min(1, "Title name is required"),
+  departmentId: z.string().optional(),
 });
 
 export const JobTitleIdSchema = z.object({
@@ -15,10 +16,12 @@ export const JobTitleIdSchema = z.object({
 export const UpdateJobTitleSchema = z.object({
   id: z.string(),
   titleName: z.string().min(1, "Title name is required"),
+  departmentId: z.string().optional(),
 });
 
 export const CreateJobTitlesInBatchSchema = z.array(
   z.object({
     titleName: z.string().min(1, "Title name is required"),
+    departmentId: z.string().optional(),
   }),
 );

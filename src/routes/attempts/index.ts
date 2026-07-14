@@ -8,6 +8,7 @@ import {
   upsertAnswer,
   submitAttempt,
   getResults,
+  markFlagged,
 } from "./attemptsController.js";
 
 export const attemptsRouter = new Hono()
@@ -15,11 +16,12 @@ export const attemptsRouter = new Hono()
   .post("/", ...createAttempt)
   // ── Attempt detail and questions ───────────────────────────────────────────
   .get("/:attemptId", ...getAttempt)
-  .get("/:id/questions/:order", ...getQuestionByOrder)
+  .get("/:attemptId/questions/:order", ...getQuestionByOrder)
   // ── Interaction during exam ────────────────────────────────────────────────
   .post("/:attemptId/questions/:order/view", ...markViewed)
+  .post("/:attemptId/questions/:order/toggle-flag", ...markFlagged)
   .post("/:attemptId/questions/:order/answer", ...upsertAnswer)
   // ── Submission ───────────────────────────────────────────────────────────
   .post("/:attemptId/submit", ...submitAttempt)
-  // ── Results (only after GRADED) ──────────────────────────────────────────
+  // ── Results exa(only after GRADED) ──────────────────────────────────────────
   .get("/:attemptId/results", ...getResults);

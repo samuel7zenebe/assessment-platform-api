@@ -1,83 +1,30 @@
 import z from "zod";
+import {
+  USER_ROLE_VALUES,
+  QUESTION_TYPE_VALUES,
+  DIFFICULTY_LABEL_VALUES,
+  EXAM_GENERATION_MODE_VALUES,
+  EXAM_STATUS_VALUES,
+  ASSIGNMENT_STATUS_VALUES,
+  ATTEMPT_STATUS_VALUES,
+  SEARCH_OPERATOR_VALUES,
+  FILTER_OPERATOR_VALUES,
+  SORT_DIRECTION_VALUES,
+  USER_FIELDS_VALUES,
+  RESOURCE_TYPE_VALUES,
+  RESOURCE_PERMISSION_VALUES,
+  PERMISSION_SCOPE_VALUES,
+} from "@/src/lib/schemas/enums.js";
 
-export const userRoleSchema = z.enum([
-  "CANDIDATE",
-  "BUILDER",
-  "ADMIN",
-  "SUPER_ADMIN",
-]);
-export const questionTypeSchema = z.enum([
-  "CHOICE",
-  "MATCH",
-  "ESSAY",
-  "TRUE_FALSE",
-]);
-export const difficultyLabelSchema = z.enum(["EASY", "MEDIUM", "HARD"]);
-export const ExamGenerationMode = z.enum([
-  "QUESTION_COUNT",
-  "POINT_TARGET",
-  "HYBRID",
-]);
-
-export const examStatusSchema = z.enum([
-  "DRAFT",
-  "PUBLISHED",
-  "ARCHIVED",
-  "ACTIVE",
-  "CLOSED",
-]);
-
-export const assignmentStatusSchema = z.enum([
-  "ASSIGNED",
-  "STARTED",
-  "COMPLETED",
-  "EXPIRED",
-]);
-
-export const attemptStatusSchema = z.enum([
-  "IN_PROGRESS",
-  "SUBMITTED",
-  "GRADED",
-  "EXPIRED",
-]);
-
-export const resourceSchema = z.enum([
-  "exam",
-  "question",
-  "user",
-  "result",
-  "candidate",
-]);
-
-export const actionSchema = z.enum([
-  "create",
-  "update",
-  "delete",
-  "read",
-  "assign_exam",
-  "unassign_exam",
-  "list",
-]);
-
-export const searchOperatorSchema = z.enum([
-  "contains",
-  "starts_with",
-  "ends_with",
-]);
-
-export const filterOperatorSchema = z.enum([
-  "eq",
-  "ne",
-  "gt",
-  "gte",
-  "lt",
-  "lte",
-  "in",
-  "not_in",
-  "starts_with",
-  "ends_with",
-  "contains",
-]);
+export const userRoleSchema = z.enum(USER_ROLE_VALUES);
+export const questionTypeSchema = z.enum(QUESTION_TYPE_VALUES);
+export const difficultyLabelSchema = z.enum(DIFFICULTY_LABEL_VALUES);
+export const ExamGenerationMode = z.enum(EXAM_GENERATION_MODE_VALUES);
+export const examStatusSchema = z.enum(EXAM_STATUS_VALUES);
+export const assignmentStatusSchema = z.enum(ASSIGNMENT_STATUS_VALUES);
+export const attemptStatusSchema = z.enum(ATTEMPT_STATUS_VALUES);
+export const searchOperatorSchema = z.enum(SEARCH_OPERATOR_VALUES);
+export const filterOperatorSchema = z.enum(FILTER_OPERATOR_VALUES);
 export const strictBooleanSchema = z.preprocess((val) => {
   if (typeof val === "string") {
     if (val.toLowerCase() === "true") return true;
@@ -85,26 +32,8 @@ export const strictBooleanSchema = z.preprocess((val) => {
   }
   return val;
 }, z.boolean());
-
-export const sortDirectionSchema = z.enum(["asc", "desc"]);
-
-export const userFieldsSchema = z.enum(["name", "email"]);
-
-/// Resource permissions
-
-export const ResourceTypeSchema = z.enum([
-  "JOB_TITLE",
-  "DEPARTMENT",
-  "QUESTION",
-  "EXAM",
-]);
-
-export const ResourcePermissionSchema = z.enum([
-  "VIEW",
-  "CREATE",
-  "UPDATE",
-  "DELETE",
-  "PUBLISH",
-  "ASSIGN",
-  "MANAGE",
-]);
+export const sortDirectionSchema = z.enum(SORT_DIRECTION_VALUES);
+export const userFieldsSchema = z.enum(USER_FIELDS_VALUES);
+export const ResourceTypeSchema = z.enum(RESOURCE_TYPE_VALUES);
+export const ResourcePermissionSchema = z.enum(RESOURCE_PERMISSION_VALUES);
+export const permissionScopeEnum = z.enum(PERMISSION_SCOPE_VALUES);

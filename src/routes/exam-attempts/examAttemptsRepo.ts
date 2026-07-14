@@ -314,7 +314,7 @@ export const examAttemptsRepo = {
       incorrectAnswers: answerRows.length - isCorrectCount,
       unansweredQuestions: attemptRows.length - answerRows.length,
       score,
-      passed: totalPossible > 0 ? score >= 50 : null,
+      passed: totalPossible > 0 ? score >= (examInfo?.passPercentage ?? 50) : null,
     };
   },
 };

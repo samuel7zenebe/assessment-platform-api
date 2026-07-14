@@ -1,0 +1,70 @@
+[
+  {
+    "title": "Forklift Operator I",
+    "departmentIds": ["DEPT001", "DEPT006"]
+  },
+  {
+    "title": "PP Bags Operator",
+    "departmentIds": ["DEPT005", "DEPT006"]
+  },
+  {
+    "title": "Casual Worker",
+    "departmentIds": ["DEPT001", "DEPT005", "DEPT006"]
+  },
+  {
+    "title": "Sales Officer",
+    "departmentIds": ["DEPT002", "DEPT008"]
+  },
+  {
+    "title": "Lab Technician II",
+    "departmentIds": ["DEPT003", "DEPT005"]
+  },
+  {
+    "title": "Lab Technician",
+    "departmentIds": ["DEPT003", "DEPT005"]
+  },
+  {
+    "title": "Mechanical Engineer II",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Senior Mechanical Technician",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Mechanical Technician IV",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Electrical Technician IV",
+    "departmentIds": ["DEPT005", "DEPT010"]
+  },
+  {
+    "title": "Mechanical Technician III",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Mechanical Technician",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Electrical Technician",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Mechanical Technician II",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Electrical Technician II",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Trainee Electrical Technician",
+    "departmentIds": ["DEPT005", "DEPT007"]
+  },
+  {
+    "title": "Transport Supervisor",
+    "departmentIds": ["DEPT006", "DEPT011"]
+  }
+]

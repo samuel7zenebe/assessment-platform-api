@@ -32,7 +32,7 @@ export async function getUserByEmail({ email }: { email: string }) {
       .from(user)
       .where(eq(user.email, email))
       .limit(1);
-    if (!userDetails.id) {
+    if (!userDetails?.id) {
       return {
         data: null,
         found: false,
@@ -84,4 +84,17 @@ export async function getJobTitleIds({
       message: "Something went wrong",
     };
   }
+}
+
+export function getRandomNumberOrders(length: number): number[] {
+  const numbers = Array.from({ length }, (_, index) => index);
+
+  // 2. Shuffle the array using Fisher-yates algorithm
+  for (let i = numbers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+  }
+
+  return numbers;
 }

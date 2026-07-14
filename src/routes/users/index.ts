@@ -13,13 +13,20 @@ import {
   getMe,
   getUserExams,
   generateFakeCandidate,
+  listUsersByDb,
+  createUser,
+  getUserByUsername,
+  registerCandidates,
 } from "./usersController.js";
 
 export const usersRouter = new Hono();
 
 usersRouter.get("/", ...listUsers);
+usersRouter.post("/", ...createUser);
+usersRouter.get("/db", ...listUsersByDb);
 usersRouter.get("/me", ...getMe);
 usersRouter.get("/exams", ...getUserExams);
+usersRouter.get("/username/:username", ...getUserByUsername);
 usersRouter.get("/:id", ...getUser);
 usersRouter.post("/ban", ...banUser);
 usersRouter.post("/unban", ...unbanUser);
@@ -30,9 +37,4 @@ usersRouter.post("/set-password", ...setUserPassword);
 usersRouter.post("/revoke-session", ...revokeUserSession); // Non tested
 usersRouter.post("/revoke-user-sessions/:id", ...revokeUserSessions); // Non tested
 usersRouter.post("/generate-fake-candidate", ...generateFakeCandidate);
-
-// | Method | Endpoint                                            | Purpose                         |
-// | ------ | --------------------------------------------------- | ------------------------------- |
-// | GET    | `/users/:userId/resource-permissions`               | List all permissions for a user |
-// | POST   | `/users/:userId/resource-permissions`               | Grant permissions to a user     |
-// | DELETE | `/users/:userId/resource-permissions/:permissionId` | Revoke one permission           |
+usersRouter.post("/import-excel", ...registerCandidates);

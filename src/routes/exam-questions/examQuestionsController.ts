@@ -143,7 +143,6 @@ export const bulkReorder = factory.createHandlers(
 );
 
 // ── PATCH /exam-questions/:examId  → reorder / update single question ─────────
-// note: the route param is `:examId`; the body supplies `questionId` + `questionOrder`
 export const updateExamQuestion = factory.createHandlers(
   sValidator("json", ReorderQuestionSchema),
   async (c) => {
@@ -180,7 +179,6 @@ export const updateExamQuestion = factory.createHandlers(
 );
 
 // ── DELETE /exam-questions/:examId  → remove question from exam ──────────────
-// note: body supplies `questionId` to identify the composite PK row
 export const removeQuestionFromExam = factory.createHandlers(
   sValidator("json", ReorderQuestionSchema),
   async (c) => {
@@ -217,7 +215,6 @@ export const removeQuestionFromExam = factory.createHandlers(
 );
 
 // ── GET /exams/:examId/questions  → exam questions (with details) ─────────────
-// aliased slug so the ?examId=... query param matches existing SelectExamQuestionsByExamIdSchema
 export const getExamQuestions = factory.createHandlers(async (c) => {
   const examId = c.req.param("examId")!;
   try {

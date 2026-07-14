@@ -1,1 +1,0 @@
-ALTER TABLE "exams" ADD COLUMN "late_entry_grace_minutes" integer DEFAULT 15 NOT NULL;

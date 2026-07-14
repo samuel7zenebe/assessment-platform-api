@@ -2,6 +2,7 @@ import { createFactory } from "hono/factory";
 import { examAttemptsRepo } from "./examAttemptsRepo.js";
 import { sValidator } from "@hono/standard-validator";
 import { z } from "zod";
+import { APIError } from "better-auth";
 import {
   ListAttemptsQuerySchema,
   StartExamSchema,
@@ -9,7 +10,6 @@ import {
   SubmitAttemptSchema,
   AttemptReviewQuerySchema,
 } from "./schema.js";
-import { APIError } from "better-auth";
 
 const factory = createFactory();
 
@@ -19,11 +19,18 @@ export const listAttempts = factory.createHandlers(
   async (c) => {
     const { examId, candidateId, status } = c.req.valid("query");
     try {
-      const data = await examAttemptsRepo.listAttempts({ examId, candidateId, status });
+      const data = await examAttemptsRepo.listAttempts({
+        examId,
+        candidateId,
+        status,
+      });
       return c.json({ data, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to list attempts", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to list attempts",
+        cause: err,
+      });
     }
   },
 );
@@ -35,11 +42,18 @@ export const getAttempt = factory.createHandlers(
     const { attemptId } = c.req.valid("param");
     try {
       const attempt = await examAttemptsRepo.getAttemptById(attemptId);
-      if (!attempt) throw new APIError("NOT_FOUND", { message: "Attempt not found", status: 404 });
+      if (!attempt)
+        throw new APIError("NOT_FOUND", {
+          message: "Attempt not found",
+          status: 404,
+        });
       return c.json({ data: attempt, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to fetch attempt", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch attempt",
+        cause: err,
+      });
     }
   },
 );
@@ -55,11 +69,18 @@ export const startExam = factory.createHandlers(
       const candidateId = c.get("user").id;
       const [attempt] = await examAttemptsRepo.listAttempts({ examId, candidateId });
       const attemptNumber = body.attemptNumber ?? (attempt?.attemptNumber ?? 0) + 1;
-      const data = await examAttemptsRepo.startExam({ examId, candidateId, attemptNumber });
+      const data = await examAttemptsRepo.startExam({
+        examId,
+        candidateId,
+        attemptNumber,
+      });
       return c.json({ data, success: true, message: "Exam started successfully." });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to start exam", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to start exam",
+        cause: err,
+      });
     }
   },
 );
@@ -72,7 +93,11 @@ export const submitAttempt = factory.createHandlers(
     const { attemptId } = c.req.valid("param");
     try {
       const existing = await examAttemptsRepo.getAttemptById(attemptId);
-      if (!existing) throw new APIError("NOT_FOUND", { message: "Attempt not found", status: 404 });
+      if (!existing)
+        throw new APIError("NOT_FOUND", {
+          message: "Attempt not found",
+          status: 404,
+        });
       if (existing.status !== "IN_PROGRESS") {
         throw new APIError("BAD_REQUEST", {
           message: `Attempt is already ${existing.status}`,
@@ -83,7 +108,10 @@ export const submitAttempt = factory.createHandlers(
       return c.json({ data, success: true, message: "Exam submitted successfully." });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to submit exam", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to submit exam",
+        cause: err,
+      });
     }
   },
 );
@@ -95,12 +123,19 @@ export const expireAttempt = factory.createHandlers(
     const { attemptId } = c.req.valid("param");
     try {
       const existing = await examAttemptsRepo.getAttemptById(attemptId);
-      if (!existing) throw new APIError("NOT_FOUND", { message: "Attempt not found", status: 404 });
+      if (!existing)
+        throw new APIError("NOT_FOUND", {
+          message: "Attempt not found",
+          status: 404,
+        });
       const data = await examAttemptsRepo.expireAttempt(attemptId);
       return c.json({ data, success: true, message: "Attempt expired successfully." });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to expire attempt", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to expire attempt",
+        cause: err,
+      });
     }
   },
 );
@@ -115,7 +150,10 @@ export const getAttemptResult = factory.createHandlers(
       return c.json({ data: result, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to fetch result", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch result",
+        cause: err,
+      });
     }
   },
 );
@@ -131,7 +169,10 @@ export const getAttemptReview = factory.createHandlers(
       return c.json({ data: review, success: true });
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError("INTERNAL_SERVER_ERROR", { message: "Failed to fetch review", cause: err });
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to fetch review",
+        cause: err,
+      });
     }
   },
 );

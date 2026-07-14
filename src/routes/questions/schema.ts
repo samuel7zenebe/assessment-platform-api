@@ -4,13 +4,8 @@ import {
   questionTypeSchema,
   strictBooleanSchema,
 } from "@/src/lib/schema.js";
+import { QuestionChoiceInputSchema } from "@/src/lib/schemas/common.js";
 import z from "zod";
-
-export const QuestionChoiceSchema = z.object({
-  choiceText: z.string().min(1, "Choice text is required"),
-  isCorrect: z.boolean(),
-  displayOrder: z.coerce.number().int().nonnegative(),
-});
 
 export const QuestionDataSchema = z.object({
   // for choice types
@@ -64,9 +59,9 @@ export const QuestionBankSchema = z.object({
   isPublic: z.boolean().optional(),
   createdBy: z.string(),
   version: z.number().default(1).optional(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  deletedAt: z.date().optional(),
+  createdAt: z.date().optional().nullable(),
+  updatedAt: z.date().optional().nullable(),
+  deletedAt: z.date().optional().nullable(),
 });
 
 export const QuestionBankCreateSchema = z.object({
@@ -93,7 +88,7 @@ export const QuestionBankCreateSchema = z.object({
   updatedAt: z.string().optional(),
   title: z.string().optional(),
   choices: z
-    .array(QuestionChoiceSchema)
+    .array(QuestionChoiceInputSchema)
     .min(2, "At least two choices are required"),
   jobTitles: z.array(z.string()).min(1, "At least one job title is required"),
 });
@@ -111,3 +106,5 @@ export const QuestionBankSearchSchema = z.object({
   jobTitleId: z.string().uuid().optional(),
   category: z.string().optional(),
 });
+
+export type QuestionBankCreateType = z.infer<typeof QuestionBankCreateSchema>;
