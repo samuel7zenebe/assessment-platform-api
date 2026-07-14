@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "bun --watch src/index.tsx",
     "build": "tsc",
-    "start": "bun run src/index.tsx"
+    "start": "bun dist/index.js",
+    "migrate": "drizzle-kit migrate",
+    "generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@faker-js/faker": "^10.5.0",
